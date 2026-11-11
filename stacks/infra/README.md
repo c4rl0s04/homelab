@@ -14,7 +14,7 @@ Planned here later: reverse proxy, local DNS, Tailscale, Homarr (optional portal
 docker compose --env-file ../../hosts/<host>.env up -d
 ```
 
-Open http://127.0.0.1:3000 and create the admin account.
+Open `http://127.0.0.1:${DOCKHAND_PORT}` (default `3000`; set `DOCKHAND_PORT` in the host file if that port is taken).
 
 ## Data and backup
 
@@ -24,9 +24,11 @@ Open http://127.0.0.1:3000 and create the admin account.
 
 The old media stack (`streaming`, running from `<old-project>`) must stay untouched during the trial.
 
-- [ ] Dockhand starts on Docker Desktop and lists the existing `streaming` containers.
+- [x] Dockhand starts on Docker Desktop (2026-11-11, v1.0.57); UI loads on the host port.
+- [ ] Add the local Docker environment (socket) and confirm it lists the existing `streaming` containers.
+- [ ] Enable authentication (Settings > Authentication) before any non-loopback access; it is off by default.
 - [ ] Only observe `streaming`: no start/stop, redeploy or adoption.
-- [ ] Container port `3000` and data path `/app/data` confirmed against the running image.
+- [x] Container port `3000` (image `EXPOSE`) and data path `/app/data` confirmed; the data directory holds `db/`, `git-repos/` and `.encryption_key`.
 - [ ] Git stack test with a throwaway stack from this repo: deploy, change, sync, remove.
 - [ ] Stack variables: set a test secret, confirm it reaches the container and is not visible in Git.
 - [ ] Restore test: stop Dockhand, copy `${DATA_ROOT}/dockhand` elsewhere, start from the copy, secrets still work.
