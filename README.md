@@ -6,7 +6,7 @@ Git-versioned definition of a personal homelab made of independent Docker Compos
 
 ```text
 stacks/
-  infra/    # Dockhand and shared infrastructure; started by hand
+  infra/    # Dockhand, AdGuard (DNS), Nginx Proxy Manager; creates the `proxy` network; started by hand
   media/    # planned: Jellyfin, *arr, qBittorrent, VPN
   trek/     # TREK travel planner; first Git stack (pilot)
   photos/   # planned: Immich candidate
