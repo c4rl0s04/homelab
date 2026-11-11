@@ -7,10 +7,51 @@ services:
     restart: unless-stopped
     ports:
       # Loopback only during the trial; open to LAN/Tailscale once authentication is set up.
-      - "127.0.0.1:${DOCKHAND_PORT:-3000}:3000"
+      # 3001 by default: AdGuard's UI uses 3000.
+      - "127.0.0.1:${DOCKHAND_PORT:-3001}:3000"
     volumes:
       # Full Docker control: root-equivalent on the host.
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/dockhand:/app/data
     environment:
       TZ: ${TZ:-Etc/UTC}
+
+  # Home DNS: ad blocking and *.home names for every device on the network.
+  adguardhome:
+    # Same image digest as the previous media stack, so the moved config loads unchanged.
+    image: adguard/adguardhome@sha256:aba9e3bf0613be3ba3755e1fc311b126e2c24bec25e18b6483894a88283074f0
+    container_name: adguardhome
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "${ADGUARD_UI_PORT:-3000}:3000/tcp"
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/adguardhome/work:/opt/adguardhome/work
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/adguardhome/conf:/opt/adguardhome/conf
+
+  # Reverse proxy: single entry point (80/443) that forwards *.home to each stack's web service.
+  npm:
+    image: jc21/nginx-proxy-manager@sha256:4393e642e233e5efd5adeb7f10918d4aaea71c9ed875b94190273fc8e87f9594
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "${NPM_ADMIN_PORT:-81}:81"
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/npm:/data
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/npm/letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy
+      - legacy-media
+
+networks:
+  # Shared network: each stack attaches only its web service so npm can reach it by container name.
+  proxy:
+    name: proxy
+  # shortcut: reaches the old media stack (still run from <old-project>) by container name;
+  # remove once media lives in stacks/media and joins `proxy`.
+  legacy-media:
+    name: streaming_default
+    external: true
