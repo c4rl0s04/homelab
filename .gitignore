@@ -1,0 +1,8 @@
+# Secrets and host-specific values never enter Git.
+.env
+*.env
+!.env.example
+!hosts/example.env
+
+# Persistent data lives under DATA_ROOT, outside this repository.
+data/

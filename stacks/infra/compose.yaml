@@ -1,0 +1,16 @@
+name: infra
+
+services:
+  dockhand:
+    image: fnsys/dockhand:v1.0.57
+    container_name: dockhand
+    restart: unless-stopped
+    ports:
+      # Loopback only during the trial; open to LAN/Tailscale once authentication is set up.
+      - "127.0.0.1:${DOCKHAND_PORT:-3000}:3000"
+    volumes:
+      # Full Docker control: root-equivalent on the host.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/dockhand:/app/data
+    environment:
+      TZ: ${TZ:-Etc/UTC}
