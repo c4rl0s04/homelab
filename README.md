@@ -8,7 +8,7 @@ Git-versioned definition of a personal homelab made of independent Docker Compos
 stacks/
   infra/    # Dockhand and shared infrastructure; started by hand
   media/    # planned: Jellyfin, *arr, qBittorrent, VPN
-  trek/     # planned
+  trek/     # TREK travel planner; first Git stack (pilot)
   photos/   # planned: Immich candidate
   paas/     # planned: Coolify/Dokploy, on its own host/VM, not managed by Dockhand
 hosts/
