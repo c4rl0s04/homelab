@@ -6,7 +6,7 @@
 
 1. **Stacks → Git stack**, repository `c4rl0s04/homelab`, branch `main`, compose file `stacks/trek/compose.yaml`. The repository is private: give Dockhand a fine-grained GitHub token with read-only *Contents* access to this repository only.
 2. Add the stack variables from `.env.example`. `TREK_ENCRYPTION_KEY` is a secret: generate it once and keep it only in Dockhand.
-3. Deploy, then open `http://127.0.0.1:3002` and create the first account (it becomes the admin).
+3. **Create** only registers the stack ("no desplegado"). Press **Deploy** on its row and confirm the Git sync, then open `http://127.0.0.1:3002` and create the first account (it becomes the admin).
 
 ## Data and backup
 
@@ -23,7 +23,7 @@ Copy both folders back to `${DATA_ROOT}/trek/`, set the same `TREK_ENCRYPTION_KE
 
 ## Pilot checklist
 
-- [ ] Git stack deploys from `main`; container becomes healthy.
-- [ ] `TREK_ENCRYPTION_KEY` reaches the container and appears nowhere in Git.
+- [x] Git stack deploys from `main` (commit `519afd2`, 2026-11-12); container healthy, `/api/health` ok, data under `${DATA_ROOT}/trek`.
+- [x] `TREK_ENCRYPTION_KEY` reaches the container (64 chars) and appears nowhere in the repository or its history.
 - [ ] Change something in `compose.yaml`, push, sync in Dockhand: the change is applied.
 - [ ] Data survives stop/start and redeploy.
