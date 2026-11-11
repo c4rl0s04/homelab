@@ -19,6 +19,7 @@ docker compose --env-file ../../hosts/<host>.env up -d
 ## How other stacks use it
 
 - **DNS** works at network level: the router hands out this host as DNS server, and AdGuard rewrites `<app>.home` to the host IP. Keep a fallback resolver in the router (e.g. `1.1.1.1`) so the home network survives if this host is down.
+- **Upstream DNS uses an IP literal** (`https://9.9.9.10/dns-query`, Quad9 unfiltered). On the Windows PC, ProtonVPN blocks plain DNS to anything but its own resolver, so AdGuard could not bootstrap `dns10.quad9.net` by name. The Windows host itself also cannot query AdGuard while ProtonVPN is connected; other devices can. Revisit on the mini PC (no desktop VPN there).
 - **Reverse proxy:** `infra` creates the Docker network `proxy`. A stack attaches only its web service to it and npm forwards by container name:
 
   ```yaml
@@ -72,4 +73,4 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 - [x] Git stack deploys with an encrypted secret (`stacks/trek`, 2026-11-12).
 - [ ] Change, push and sync an existing Git stack.
 - [ ] Restore test: stop Dockhand, copy `${DATA_ROOT}/dockhand` elsewhere, start from the copy, secrets still work.
-- [ ] AdGuard + npm cutover above completed and verified.
+- [x] AdGuard + npm cutover completed 2026-11-12: DNS rewrites answer, `google.com` resolves upstream, all four npm proxy hosts reach the old media stack, media started with `docker compose start`.
