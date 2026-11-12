@@ -30,7 +30,22 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
 - **Upstream DNS uses an IP literal** (`https://9.9.9.10/dns-query`, Quad9 unfiltered). On the Windows PC, ProtonVPN blocks plain DNS to anything but its own resolver, so AdGuard could not bootstrap `dns10.quad9.net` by name. The Windows host itself also cannot query AdGuard while ProtonVPN is connected; other devices can. Revisit on the mini PC (no desktop VPN there).
 - **Router DHCP** (`192.168.1.1`) currently hands out `192.168.1.10, 1.1.1.1`. Devices may pick `1.1.1.1`, which does not know `*.home` (confirmed 2026-11-12: a phone works with DNS set manually to `192.168.1.10`). Kept on purpose while AdGuard runs on a PC that is not always on; remove `1.1.1.1` once the mini PC hosts DNS. Reserve the host's IP in the router so the DNS address never changes.
 - **Port 53 on Windows:** the "Internet Connection Sharing" service (`SharedAccess`, used by Mobile Hotspot) can grab UDP 53 on IPv4; AdGuard then only gets IPv6 and LAN devices are answered by Windows instead. Stop it (`Stop-Service SharedAccess`, admin) and recreate `adguardhome`; disable it if the hotspot is not used.
-- **Reverse proxy:** `infra` creates the Docker network `proxy`. A stack attaches only its web service to it and npm forwards by container name:
+- **Names:** a single AdGuard rewrite `*.home → <host IP>` covers every name; npm then maps each name to a container:
+
+  | Name | Target |
+  | --- | --- |
+  | `jellyfin.home` | `jellyfin:8096` |
+  | `jellyseer.home` | `jellyseerr:5055` |
+  | `radarr.home` | `radarr:7878` |
+  | `qbit.home` | `gluetun:8080` |
+  | `trek.home` | `trek:3000` |
+  | `dockhand.home` | `dockhand:3000` |
+  | `backrest.home` | `backrest:9898` |
+  | `adguard.home` | `adguardhome:3000` |
+  | `npm.home` | `npm:81` |
+
+  Admin panels reachable this way are protected only by their own logins; Dockhand is root-equivalent on the host, so use a strong password.
+- **Reverse proxy:** the Docker network `proxy` is created once per host (`docker network create proxy`; see `stacks/dockhand`). A stack attaches its web service to it and npm forwards by container name:
 
   ```yaml
   services:

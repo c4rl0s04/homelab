@@ -4,11 +4,19 @@ The stack manager: status, start/stop, statistics, logs, per-stack variables and
 
 ## Start
 
+On a new host, create the shared network once (every stack with a web UI joins it):
+
+```bash
+docker network create proxy
+```
+
+Then:
+
 ```bash
 docker compose --env-file ../../hosts/<host>.env up -d
 ```
 
-Open `http://127.0.0.1:${DOCKHAND_PORT:-3001}`.
+Open `http://dockhand.home` (or `http://127.0.0.1:${DOCKHAND_PORT:-3001}` from the host itself, which also works before `infra` is up).
 
 ## What it manages
 

@@ -114,7 +114,7 @@ Each stack folder holds:
 1. Install Docker. Stop every stack on the old host.
 2. Copy the homelab folder (`repo`, `data`, `media`), or clone the repository and restore `data` from backup (it includes Dockhand's data and secret key).
 3. Create `hosts/<host>.env` from `hosts/example.env` with the new paths.
-4. Start `stacks/dockhand` by hand; in Dockhand, update `DATA_ROOT` / `MEDIA_ROOT` / `BACKUP_ROOT` on each stack and deploy `infra` first, then the rest.
-5. Repoint local DNS to the new host; verify every stack before retiring the old one.
+4. Create the shared network once (`docker network create proxy`), start `stacks/dockhand` by hand; in Dockhand, update `DATA_ROOT` / `MEDIA_ROOT` / `BACKUP_ROOT` on each stack and deploy `infra` first, then the rest.
+5. Repoint local DNS to the new host (router DHCP and the AdGuard `*.home` rewrite); verify every stack before retiring the old one.
 
 A stack is migration-ready only after it has been restored from backup at least once.
