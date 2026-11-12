@@ -6,7 +6,8 @@ Git-versioned definition of a personal homelab made of independent Docker Compos
 
 ```text
 stacks/
-  infra/    # Dockhand, AdGuard (DNS), Nginx Proxy Manager; creates the `proxy` network; started by hand
+  dockhand/ # the stack manager; the only stack started by hand
+  infra/    # AdGuard (DNS), Nginx Proxy Manager, Backrest; creates the `proxy` network; managed by Dockhand
   media/    # planned: Jellyfin, *arr, qBittorrent, VPN
   trek/     # TREK travel planner; first Git stack (pilot)
   photos/   # planned: Immich candidate
@@ -26,7 +27,7 @@ Each stack folder holds:
 | Layer | Location | In Git |
 | --- | --- | --- |
 | Definition | `stacks/<name>/` | Yes |
-| Secrets | Dockhand per-stack variables (encrypted in its database); `.env` only for `infra/` | Never |
+| Secrets | Dockhand per-stack variables (encrypted in its database); host file only for `dockhand/` | Never |
 | Application data | `${DATA_ROOT}/<stack>/` bind mounts | No; per-stack backups |
 | Bulk media | `${MEDIA_ROOT}` on a separate disk | No; moved or copied directly |
 
@@ -37,12 +38,12 @@ Each stack folder holds:
 - Every Compose file sets `name:` so the project name does not depend on its folder.
 - Services are reached by hostname through the reverse proxy and local DNS, not `IP:port`.
 - No Docker Desktop–only features (`host.docker.internal`, Windows paths, named pipes).
-- One manager per stack: Dockhand manages everything except `infra/` (by hand) and `paas/` (its own platform).
+- One manager per stack: Dockhand manages everything except itself (`dockhand/`, by hand) and `paas/` (its own platform).
 - Dockhand holds the Docker socket (root-equivalent): reachable only over LAN/Tailscale with authentication, never from the internet.
 
 ## Management
 
-- **Dockhand** (`stacks/infra`) is the control panel. Each other stack is registered as a Git stack pointing at `stacks/<name>/compose.yaml`; host values and secrets are Dockhand stack variables. Change a Compose file, push, then sync/redeploy in Dockhand.
+- **Dockhand** (`stacks/dockhand`) is the control panel. Each other stack is registered as a Git stack pointing at `stacks/<name>/compose.yaml`; host values and secrets are Dockhand stack variables. Change a Compose file, push, then sync/redeploy in Dockhand.
 - **Homarr** is an optional later portal with links and read-only widgets.
 
 ## Moving to a new host
@@ -50,7 +51,7 @@ Each stack folder holds:
 1. Install Docker; clone this repository.
 2. Create `hosts/<host>.env` from `hosts/example.env`.
 3. Restore `${DATA_ROOT}` from backup (includes Dockhand's data and secret key); attach or copy `${MEDIA_ROOT}`.
-4. Start `stacks/infra`, then each stack from Dockhand.
+4. Start `stacks/dockhand` by hand, then deploy `infra` and every other stack from Dockhand.
 5. Repoint local DNS to the new host; verify every stack before retiring the old one.
 
 A stack is migration-ready only after it has been restored from backup at least once.

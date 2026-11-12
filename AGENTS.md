@@ -4,7 +4,7 @@ Read `README.md` first: it defines the stack layout, layers and portability rule
 
 ## Current state
 
-- `stacks/infra` runs Dockhand (trial) and takes over AdGuard and Nginx Proxy Manager from the old media stack (see its cutover section); `stacks/trek` is the first Git stack pilot. See each stack's checklist before relying on Dockhand behaviour.
+- `stacks/dockhand` (the manager, started by hand) deploys `stacks/infra` (AdGuard, Nginx Proxy Manager, Backrest) and `stacks/trek` as Git stacks. See each stack's checklist before relying on Dockhand behaviour.
 - The live media stack still runs from the previous repository (`c4rl0s04/previous-project`, local `<old-project>`, Compose project `streaming`). Do not stop, adopt, redeploy or modify it from here. It moves to `stacks/media` only through a planned cutover: stop old stack, copy its `configs/` into `${DATA_ROOT}/media`, start the new stack, verify, keep the old one as rollback.
 - No custom control panel or orchestration code: use Dockhand, the native application UIs and standard backup tooling.
 
