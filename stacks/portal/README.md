@@ -9,7 +9,7 @@ Homepage's YAML files (`settings`, `services`, `widgets`, `bookmarks`) are inlin
 - the whole dashboard is versioned in Git and moves with the repository;
 - no host path is needed. Dockhand runs Compose from its own checkout (`/app/data/stacks/...`), so a relative bind mount such as `./config` would point at a path that does not exist on the host.
 
-Change the dashboard by editing `compose.yaml`, push, then sync the stack in Dockhand. Inside the inline content, write `$$` for a literal `$` (Compose interpolates `${...}`).
+Change the dashboard by editing `compose.yaml` and push. Then in Dockhand press **Desmontar** (removes only the container; Homepage keeps no data) and **Desplegar**: a plain sync pulls the new file but Compose does not recreate the container when only inline `configs` content changes (seen 2026-11-13 with Dockhand 1.0.57). Changes to stack variables (widget keys) apply with a normal redeploy. Inside the inline content, write `$$` for a literal `$` (Compose interpolates `${...}`).
 
 No Docker socket: status dots come from `siteMonitor` checks against each container on the `proxy` network.
 
@@ -37,5 +37,5 @@ None: the configuration is in Git and the keys are in Dockhand. Homepage only wr
 ## Checklist
 
 - [x] Trial run outside Dockhand (2026-11-12, `v2.7.0`): page renders, all groups and status checks load; widgets without keys show "API error" as expected.
-- [ ] Deployed as a Git stack; `portal.home` answers.
-- [ ] Widget keys added; Jellyfin, Jellyseerr, Radarr, Prowlarr and Bazarr widgets show data.
+- [x] Deployed as a Git stack (2026-11-12); `portal.home` answers; Uptime Kuma checks it with header `Host: portal.home` (Homepage rejects other host names).
+- [ ] Widget keys: Jellyfin (widget `version: 2` for Jellyfin 12), Jellyseerr and Bazarr show data (2026-11-13); Radarr and Prowlarr pending.
