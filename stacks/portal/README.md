@@ -38,4 +38,4 @@ None: the configuration is in Git and the keys are in Dockhand. Homepage only wr
 
 - [x] Trial run outside Dockhand (2026-11-12, `v2.7.0`): page renders, all groups and status checks load; widgets without keys show "API error" as expected.
 - [x] Deployed as a Git stack (2026-11-12); `portal.home` answers; Uptime Kuma checks it with header `Host: portal.home` (Homepage rejects other host names).
-- [ ] Widget keys: Jellyfin (widget `version: 2` for Jellyfin 12), Jellyseerr and Bazarr show data (2026-11-13); Radarr and Prowlarr pending.
+- [x] Widget keys (2026-11-13): Jellyfin (widget `version: 2` for Jellyfin 12), Jellyseerr, Radarr, Prowlarr and Bazarr show data.
