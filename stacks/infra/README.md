@@ -43,7 +43,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
   ```
 
   Then add a proxy host in npm (`app.home` → `http://<container_name>:<port>`) and a DNS rewrite in AdGuard if no wildcard covers it.
-- **Transitional:** npm also joins `streaming_default` to reach the old media stack (`jellyfin`, `radarr`, `gluetun`, `jellyseerr`). That network must exist (the old stack stopped is fine; `docker compose down` there would remove it and block `infra`). Remove it once media moves to `stacks/media`.
+- The media stack joins `proxy` entirely, so npm reaches `jellyfin`, `radarr`, `jellyseerr` and `gluetun` (qBittorrent) by container name.
 
 ## Cutover from the old media stack (AdGuard + npm), done 2026-11-12
 

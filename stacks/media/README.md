@@ -33,5 +33,5 @@ Git stack `media`, compose file `stacks/media/compose.yaml`, variables from `.en
 
 ## Checklist
 
-- [ ] Cutover done and verified.
+- [x] Cutover done and verified 2026-11-12: backup taken first; app configs copied with identical file counts and sizes; gluetun healthy on its own ProtonVPN exit IP, forwarded port synced into qBittorrent; all web UIs and `*.home` names respond; Jellyfin keeps its server identity and its library (`/media/movies`). Radarr and Prowlarr log SSL errors reaching their update/notification servers; the old logs show the same errors before the migration (host-side network issue, not caused by the cutover).
 - [ ] Old stack folder retired after a few days of normal use.

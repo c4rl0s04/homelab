@@ -22,7 +22,7 @@ flowchart LR
     trek["TREK<br/>travel planner"]
   end
 
-  subgraph MEDIA["streaming · old repo, not migrated yet"]
+  subgraph MEDIA["media"]
     media["Jellyfin · Radarr<br/>qBittorrent · VPN"]
   end
 
@@ -32,7 +32,9 @@ flowchart LR
   git --> dockhand
   dockhand -- deploys --> INFRA
   dockhand -- deploys --> TREK
-  INFRA & TREK --> data
+  dockhand -- deploys --> MEDIA
+  INFRA & TREK & MEDIA --> data
+  MEDIA --> films[("films and downloads<br/>MEDIA_ROOT")]
   data -- every 24 h --> backups
 
   classDef manager fill:#ccfbf1,stroke:#0f766e,color:#042f2e
@@ -44,11 +46,11 @@ flowchart LR
   class adguard,npm,backrest infra
   class trek trek
   class media media
-  class git,data,backups storage
+  class git,data,backups,films storage
   style DOCKHAND fill:#f0fdfa,stroke:#0f766e,color:#042f2e
   style INFRA fill:#eef2ff,stroke:#4338ca,color:#1e1b4b
   style TREK fill:#fffbeb,stroke:#b45309,color:#451a03
-  style MEDIA fill:#fff1f2,stroke:#be123c,color:#4c0519,stroke-dasharray: 5 4
+  style MEDIA fill:#fff1f2,stroke:#be123c,color:#4c0519
 ```
 
 One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-data` (`DATA_ROOT`), copies in `homelab-backups` (`BACKUP_ROOT`). Network details (DNS, `*.home`, Docker networks) are in `stacks/infra/README.md`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
@@ -59,7 +61,7 @@ One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-
 stacks/
   dockhand/ # the stack manager; the only stack started by hand
   infra/    # AdGuard (DNS), Nginx Proxy Manager, Backrest; creates the `proxy` network; managed by Dockhand
-  media/    # planned: Jellyfin, *arr, qBittorrent, VPN
+  media/    # Jellyfin, Jellyseerr, Radarr, Prowlarr, Bazarr, qBittorrent behind ProtonVPN
   trek/     # TREK travel planner; first Git stack (pilot)
   photos/   # planned: Immich candidate
   paas/     # planned: Coolify/Dokploy, on its own host/VM, not managed by Dockhand
