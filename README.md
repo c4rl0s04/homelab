@@ -69,6 +69,16 @@ hosts/
   example.env   # template for host-specific values; real files stay private
 ```
 
+On the host everything lives under one folder, so moving the homelab means copying it:
+
+```text
+E:\homelab\            (/srv/homelab on Linux)
+  repo\     # this repository
+  data\     # DATA_ROOT: app data, Dockhand's encrypted secrets
+  media\    # MEDIA_ROOT: downloads/ and media/ (films)
+C:\homelab-backups\    # BACKUP_ROOT: deliberately on another disk
+```
+
 Each stack folder holds:
 
 - `compose.yaml`: pinned image versions, variables only, no secrets, no host paths.
@@ -101,10 +111,10 @@ Each stack folder holds:
 
 ## Moving to a new host
 
-1. Install Docker; clone this repository.
-2. Create `hosts/<host>.env` from `hosts/example.env`.
-3. Restore `${DATA_ROOT}` from backup (includes Dockhand's data and secret key); attach or copy `${MEDIA_ROOT}`.
-4. Start `stacks/dockhand` by hand, then deploy `infra` and every other stack from Dockhand.
+1. Install Docker. Stop every stack on the old host.
+2. Copy the homelab folder (`repo`, `data`, `media`), or clone the repository and restore `data` from backup (it includes Dockhand's data and secret key).
+3. Create `hosts/<host>.env` from `hosts/example.env` with the new paths.
+4. Start `stacks/dockhand` by hand; in Dockhand, update `DATA_ROOT` / `MEDIA_ROOT` / `BACKUP_ROOT` on each stack and deploy `infra` first, then the rest.
 5. Repoint local DNS to the new host; verify every stack before retiring the old one.
 
 A stack is migration-ready only after it has been restored from backup at least once.

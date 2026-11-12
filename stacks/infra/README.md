@@ -16,7 +16,7 @@ Git stack `infra`: repository `homelab`, branch `main`, compose file `stacks/inf
 
 | Variable | Windows PC value |
 | --- | --- |
-| `DATA_ROOT` | `<data-root>` |
+| `DATA_ROOT` | `E:/homelab/data` |
 | `BACKUP_ROOT` | `C:/homelab-backups` |
 | `LEGACY_MEDIA_ROOT` | `<old-project>` |
 | `TZ` | `Europe/Madrid` |
