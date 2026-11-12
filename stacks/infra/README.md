@@ -18,7 +18,6 @@ Git stack `infra`: repository `homelab`, branch `main`, compose file `stacks/inf
 | --- | --- |
 | `DATA_ROOT` | `E:/homelab/data` |
 | `BACKUP_ROOT` | `C:/homelab-backups` |
-| `LEGACY_MEDIA_ROOT` | `<old-project>` |
 | `TZ` | `Europe/Madrid` |
 
 Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898).
@@ -76,8 +75,8 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 | Setting | Value |
 | --- | --- |
 | Repository | `homelab-local` → `/repos/homelab` = `${BACKUP_ROOT}/homelab` (`C:\homelab-backups\homelab`, SSD, different disk from `E:`) |
-| Plan | `homelab-daily`: `/userdata/homelab-data` and `/userdata/legacy-media` |
-| Excludes | `legacy-media/data` (films, downloads), `legacy-media/backups`, `legacy-media/.venv`, `homelab-data/backrest/cache`, `__pycache__` |
+| Plan | `homelab-daily`: `/userdata/homelab-data` (the old `<old-project>` folder was dropped on 2026-11-12; earlier snapshots still hold it) |
+| Excludes | `homelab-data/backrest/cache`, `__pycache__` |
 | Schedule | Every 24 h counted from the last run, so a backup runs soon after the PC is switched on |
 | Retention | 24 hourly, 30 daily, 12 monthly |
 

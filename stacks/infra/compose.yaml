@@ -51,9 +51,6 @@ services:
       - ${DATA_ROOT:?Set DATA_ROOT}/backrest/cache:/cache
       # Sources are read-only: backups can never modify live data.
       - ${DATA_ROOT:?Set DATA_ROOT}:/userdata/homelab-data:ro
-      # shortcut: old media stack folder (configs, .env), until media lives in stacks/media.
-      # The backup plan excludes its data/ (films, downloads).
-      - ${LEGACY_MEDIA_ROOT:?Set LEGACY_MEDIA_ROOT}:/userdata/legacy-media:ro
       # Repository on a different physical disk than DATA_ROOT.
       - ${BACKUP_ROOT:?Set BACKUP_ROOT}:/repos
 
