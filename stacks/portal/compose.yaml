@@ -1,0 +1,168 @@
+name: portal
+
+# Homepage: one page with every app, its status and live widgets.
+# Its configuration lives in this file (Compose `configs` with inline content) so it is versioned in Git
+# and needs no host path: Dockhand runs Compose from its own checkout, where `./config` would not resolve on the host.
+# Widget keys come from Dockhand stack variables; Homepage reads them as {{HOMEPAGE_VAR_*}}.
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:v2.7.0
+    container_name: homepage
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PORTAL_PORT:-3004}:3000"
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      HOMEPAGE_ALLOWED_HOSTS: portal.home,127.0.0.1:${PORTAL_PORT:-3004}
+      # Optional until set in Dockhand; a widget without its key shows an error, the link still works.
+      HOMEPAGE_VAR_JELLYFIN_KEY: ${JELLYFIN_API_KEY:-}
+      HOMEPAGE_VAR_JELLYSEERR_KEY: ${JELLYSEERR_API_KEY:-}
+      HOMEPAGE_VAR_RADARR_KEY: ${RADARR_API_KEY:-}
+      HOMEPAGE_VAR_PROWLARR_KEY: ${PROWLARR_API_KEY:-}
+      HOMEPAGE_VAR_BAZARR_KEY: ${BAZARR_API_KEY:-}
+    configs:
+      - { source: settings, target: /app/config/settings.yaml }
+      - { source: services, target: /app/config/services.yaml }
+      - { source: widgets, target: /app/config/widgets.yaml }
+      - { source: bookmarks, target: /app/config/bookmarks.yaml }
+      - { source: docker, target: /app/config/docker.yaml }
+    networks:
+      - proxy # portal.home, and status checks by container name
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+configs:
+  settings:
+    content: |
+      title: Homelab
+      language: es
+      theme: dark
+      color: slate
+      headerStyle: boxed
+      statusStyle: dot
+      hideVersion: true
+      layout:
+        Multimedia:
+          style: row
+          columns: 3
+        Apps:
+          style: row
+          columns: 3
+        Sistema:
+          style: row
+          columns: 3
+
+  services:
+    content: |
+      - Multimedia:
+          - Jellyfin:
+              icon: jellyfin.png
+              href: http://jellyfin.home
+              description: Películas
+              siteMonitor: http://jellyfin:8096/health
+              widget:
+                type: jellyfin
+                url: http://jellyfin:8096
+                key: "{{HOMEPAGE_VAR_JELLYFIN_KEY}}"
+                enableBlocks: true
+                enableNowPlaying: true
+          - Jellyseerr:
+              icon: jellyseerr.png
+              href: http://jellyseer.home
+              description: Pedir películas
+              siteMonitor: http://jellyseerr:5055
+              widget:
+                type: jellyseerr
+                url: http://jellyseerr:5055
+                key: "{{HOMEPAGE_VAR_JELLYSEERR_KEY}}"
+          - Radarr:
+              icon: radarr.png
+              href: http://radarr.home
+              description: Gestión de películas
+              siteMonitor: http://radarr:7878/ping
+              widget:
+                type: radarr
+                url: http://radarr:7878
+                key: "{{HOMEPAGE_VAR_RADARR_KEY}}"
+          - qBittorrent:
+              icon: qbittorrent.png
+              href: http://qbit.home
+              description: Descargas por VPN
+              siteMonitor: http://gluetun:8080
+          - Prowlarr:
+              icon: prowlarr.png
+              href: http://prowlarr.home
+              description: Indexadores
+              siteMonitor: http://prowlarr:9696/ping
+              widget:
+                type: prowlarr
+                url: http://prowlarr:9696
+                key: "{{HOMEPAGE_VAR_PROWLARR_KEY}}"
+          - Bazarr:
+              icon: bazarr.png
+              href: http://bazarr.home
+              description: Subtítulos
+              siteMonitor: http://bazarr:6767
+              widget:
+                type: bazarr
+                url: http://bazarr:6767
+                key: "{{HOMEPAGE_VAR_BAZARR_KEY}}"
+      - Apps:
+          - TREK:
+              icon: mdi-map-marker-path
+              href: http://trek.home
+              description: Viajes
+              siteMonitor: http://trek:3000/api/health
+      - Sistema:
+          - Dockhand:
+              icon: mdi-docker
+              href: http://dockhand.home
+              description: Stacks y despliegues
+              siteMonitor: http://dockhand:3000
+          - Uptime Kuma:
+              icon: uptime-kuma.png
+              href: http://status.home
+              description: Estado y avisos
+              siteMonitor: http://uptime-kuma:3001
+          - AdGuard:
+              icon: adguard-home.png
+              href: http://adguard.home
+              description: DNS y bloqueo de anuncios
+              siteMonitor: http://adguardhome:3000
+          - Nginx Proxy Manager:
+              icon: nginx-proxy-manager.png
+              href: http://npm.home
+              description: Nombres .home
+              siteMonitor: http://npm:81
+          - Backrest:
+              icon: backrest.png
+              href: http://backrest.home
+              description: Copias de seguridad
+              siteMonitor: http://backrest:9898
+
+  widgets:
+    content: |
+      - resources:
+          cpu: true
+          memory: true
+          uptime: true
+      - datetime:
+          text_size: xl
+          locale: es
+          format:
+            dateStyle: full
+            timeStyle: short
+
+  bookmarks:
+    content: |
+      - Repositorio:
+          - GitHub homelab:
+              - icon: github.png
+                href: https://github.com/c4rl0s04/homelab
+
+  docker:
+    content: |
+      # Empty on purpose: no Docker socket, Homepage gets status from siteMonitor checks.
