@@ -6,7 +6,7 @@ Read `README.md` first: it defines the stack layout, layers and portability rule
 
 - `stacks/dockhand` (the manager, started by hand) deploys `stacks/infra` (AdGuard, Nginx Proxy Manager, Backrest), `stacks/trek` and `stacks/media` as Git stacks. See each stack's checklist before relying on Dockhand behaviour.
 - On the Windows PC everything lives in `E:\homelab` (`repo`, `data`, `media`); backups in `C:\homelab-backups`.
-- `stacks/media` replaced the old `streaming` stack on 2026-11-12. The old folder `<old-project>` (repo `previous-project`) now only holds the old project and its copied configs; films moved to `E:\homelab\media`. Never start its containers while `media` runs (same container names and ports). Pending: retire it and drop it from the Backrest plan.
+- `stacks/media` replaced the old `streaming` stack on 2026-11-12. The old folder `<old-project>` (repo `previous-project`) now only holds the old project and its copied configs; films moved to `E:\homelab\media`. Never start its containers while `media` runs (same container names and ports). It is no longer backed up and the repo is archived on GitHub; the owner renames the local folder to `old-project`.
 - No custom control panel or orchestration code: use Dockhand, the native application UIs and standard backup tooling.
 
 ## Documentation
