@@ -29,7 +29,6 @@ services:
       - ${DATA_ROOT:?Set DATA_ROOT}/npm/letsencrypt:/etc/letsencrypt
     networks:
       - proxy
-      - legacy-media
 
   # Backups: web UI for restic (encrypted, deduplicated snapshots).
   backrest:
@@ -59,11 +58,6 @@ services:
       - ${BACKUP_ROOT:?Set BACKUP_ROOT}:/repos
 
 networks:
-  # Shared network: each stack attaches only its web service so npm can reach it by container name.
+  # Shared network: stacks attach their web services (media attaches entirely) so npm can reach them by container name.
   proxy:
     name: proxy
-  # shortcut: reaches the old media stack (still run from <old-project>) by container name;
-  # remove once media lives in stacks/media and joins `proxy`.
-  legacy-media:
-    name: streaming_default
-    external: true
