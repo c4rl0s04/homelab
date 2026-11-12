@@ -1,0 +1,18 @@
+name: dockhand
+
+# The stack manager. The only stack started by hand: it must never manage itself.
+services:
+  dockhand:
+    image: fnsys/dockhand:v1.0.57
+    container_name: dockhand
+    restart: unless-stopped
+    ports:
+      # Loopback only; open to LAN/Tailscale once needed (authentication is enabled).
+      # 3001 by default: AdGuard's UI uses 3000.
+      - "127.0.0.1:${DOCKHAND_PORT:-3001}:3000"
+    volumes:
+      # Full Docker control: root-equivalent on the host.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/dockhand:/app/data
+    environment:
+      TZ: ${TZ:-Etc/UTC}

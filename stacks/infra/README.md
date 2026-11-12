@@ -1,21 +1,29 @@
 # infra
 
-Shared infrastructure used by every stack. Started by hand, never managed from Dockhand (stopping it from its own panel would remove the panel).
+Shared infrastructure used by every stack. **Managed by Dockhand as a Git stack** (the manager itself lives in `stacks/dockhand`). Stopping or redeploying this stack interrupts home DNS for a few seconds; the router's fallback resolver keeps Internet working meanwhile.
 
 | Service | Purpose | Admin UI | Status |
 | --- | --- | --- | --- |
-| Dockhand | Control panel for all other stacks | `127.0.0.1:${DOCKHAND_PORT:-3001}` | Trial |
 | AdGuard Home | Home DNS: ad blocking and `*.home` names (DNS rewrites) for every device | `:${ADGUARD_UI_PORT:-3000}` | Running |
 | Nginx Proxy Manager | Reverse proxy on 80/443: forwards `*.home` to each stack's web service | `:${NPM_ADMIN_PORT:-81}` | Running |
 | Backrest | Encrypted, deduplicated backups (restic) of `DATA_ROOT` and the old media folder | `127.0.0.1:${BACKREST_PORT:-9898}` | Running |
 
 Planned here later: Tailscale, Homarr (optional portal).
 
-## Start
+## Deploy with Dockhand
 
-```bash
-docker compose --env-file ../../hosts/<host>.env up -d
-```
+Git stack `infra`: repository `homelab`, branch `main`, compose file `stacks/infra/compose.yaml`. Stack variables (no secrets in this stack):
+
+| Variable | Windows PC value |
+| --- | --- |
+| `DATA_ROOT` | `<data-root>` |
+| `BACKUP_ROOT` | `C:/homelab-backups` |
+| `LEGACY_MEDIA_ROOT` | `<old-project>` |
+| `TZ` | `Europe/Madrid` |
+
+Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898).
+
+**Without Dockhand** (recovery, or a new host before Dockhand is up): `docker compose --env-file ../../hosts/<host>.env up -d` from this folder. Dockhand then shows the stack as untracked until it is registered again.
 
 ## How other stacks use it
 
@@ -37,7 +45,9 @@ docker compose --env-file ../../hosts/<host>.env up -d
   Then add a proxy host in npm (`app.home` → `http://<container_name>:<port>`) and a DNS rewrite in AdGuard if no wildcard covers it.
 - **Transitional:** npm also joins `streaming_default` to reach the old media stack (`jellyfin`, `radarr`, `gluetun`, `jellyseerr`). That network must exist (the old stack stopped is fine; `docker compose down` there would remove it and block `infra`). Remove it once media moves to `stacks/media`.
 
-## Cutover from the old media stack (AdGuard + npm)
+## Cutover from the old media stack (AdGuard + npm), done 2026-11-12
+
+Kept as a record and rollback reference; it predates management by Dockhand.
 
 Images are the same digests as before, so configuration loads unchanged. Old configuration is copied, not moved: it stays as rollback.
 
@@ -78,20 +88,13 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 
 **Restore test (2026-11-12):** snapshot `6c2d4363` (1.05 GiB source, 376 MB in the repository); `homelab-data` restored to `/tmp/restore-test`: 108/108 files, and `dockhand/.encryption_key`, `dockhand/db/dockhand.db`, `trek/data/travel.db`, `trek/data/.encryption_key`, `adguardhome/conf/AdGuardHome.yaml`, `npm/database.sqlite`, `npm/keys.json` byte-identical (sha256). Test copy deleted afterwards.
 
-## Data and backup
+## Data
 
-- `${DATA_ROOT}/dockhand/` holds Dockhand's database, **including the encrypted stack variables and their key**. Without it, a migration loses every stack secret.
-- `${DATA_ROOT}/adguardhome/` (DNS rules, rewrites, admin account) and `${DATA_ROOT}/npm/` (proxy hosts, certificates, admin account).
-- Back up all of `DATA_ROOT`.
+- `${DATA_ROOT}/adguardhome/` (DNS rules, rewrites, admin account), `${DATA_ROOT}/npm/` (proxy hosts, certificates, admin account), `${DATA_ROOT}/backrest/` (backup config).
+- All of `DATA_ROOT` is backed up by the plan above.
 
-## Trial checklist
+## Checklist
 
-- [x] Dockhand starts on Docker Desktop (2026-11-11, v1.0.57); UI loads on the host port.
-- [x] Local Docker environment added; lists the existing `streaming` stack as untracked.
-- [x] Authentication enabled.
-- [x] Container port `3000` (image `EXPOSE`) and data path `/app/data` confirmed; the data directory holds `db/`, `git-repos/` and `.encryption_key`.
-- [x] Git stack deploys with an encrypted secret (`stacks/trek`, 2026-11-12).
-- [ ] Change, push and sync an existing Git stack.
 - [x] Backup restore test of `DATA_ROOT` (files byte-identical, see Backups).
-- [ ] Full Dockhand restore: start Dockhand from a restored `${DATA_ROOT}/dockhand` and confirm stack secrets still decrypt.
-- [x] AdGuard + npm cutover completed 2026-11-12: DNS rewrites answer, `google.com` resolves upstream, all four npm proxy hosts reach the old media stack, media started with `docker compose start`.
+- [x] AdGuard + npm cutover completed 2026-11-12: DNS rewrites answer, `google.com` resolves upstream, all four npm proxy hosts reach the old media stack.
+- [ ] Registered and deployed as a Dockhand Git stack; DNS, proxy and Backrest verified afterwards.
