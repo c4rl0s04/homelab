@@ -5,10 +5,11 @@ Shared infrastructure used by every stack. Started by hand, never managed from D
 | Service | Purpose | Admin UI | Status |
 | --- | --- | --- | --- |
 | Dockhand | Control panel for all other stacks | `127.0.0.1:${DOCKHAND_PORT:-3001}` | Trial |
-| AdGuard Home | Home DNS: ad blocking and `*.home` names (DNS rewrites) for every device | `:${ADGUARD_UI_PORT:-3000}` | Moving from the old media stack |
-| Nginx Proxy Manager | Reverse proxy on 80/443: forwards `*.home` to each stack's web service | `:${NPM_ADMIN_PORT:-81}` | Moving from the old media stack |
+| AdGuard Home | Home DNS: ad blocking and `*.home` names (DNS rewrites) for every device | `:${ADGUARD_UI_PORT:-3000}` | Running |
+| Nginx Proxy Manager | Reverse proxy on 80/443: forwards `*.home` to each stack's web service | `:${NPM_ADMIN_PORT:-81}` | Running |
+| Backrest | Encrypted, deduplicated backups (restic) of `DATA_ROOT` and the old media folder | `127.0.0.1:${BACKREST_PORT:-9898}` | Running |
 
-Planned here later: Tailscale, Homarr (optional portal), backup tool.
+Planned here later: Tailscale, Homarr (optional portal).
 
 ## Start
 
@@ -60,6 +61,23 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 
 **Rollback:** `docker compose --env-file ../../hosts/windows-pc.env rm -sf adguardhome npm` here, then `docker compose up -d adguardhome npm` in `<old-project>` (its original config was never changed).
 
+## Backups (Backrest)
+
+| Setting | Value |
+| --- | --- |
+| Repository | `homelab-local` → `/repos/homelab` = `${BACKUP_ROOT}/homelab` (`C:\homelab-backups\homelab`, SSD, different disk from `E:`) |
+| Plan | `homelab-daily`: `/userdata/homelab-data` and `/userdata/legacy-media` |
+| Excludes | `legacy-media/data` (films, downloads), `legacy-media/backups`, `legacy-media/.venv`, `homelab-data/backrest/cache`, `__pycache__` |
+| Schedule | Every 24 h counted from the last run, so a backup runs soon after the PC is switched on |
+| Retention | 24 hourly, 30 daily, 12 monthly |
+
+- **The repository password lives outside this PC** (owner's password manager). Backrest's own config sits in `DATA_ROOT` on `E:`; if that disk dies, the copies on `C:` are unreadable without the password.
+- Sources are mounted read-only. Restore to a writable path such as `/tmp/<name>` inside the container (then copy out), never over `/userdata`.
+- Databases are copied live (no container stop). SQLite files restored fine in the test below; stop a stack before a backup used for migration.
+- Only one copy, on the same PC. An offsite copy (cloud or external disk) is still pending.
+
+**Restore test (2026-11-12):** snapshot `6c2d4363` (1.05 GiB source, 376 MB in the repository); `homelab-data` restored to `/tmp/restore-test`: 108/108 files, and `dockhand/.encryption_key`, `dockhand/db/dockhand.db`, `trek/data/travel.db`, `trek/data/.encryption_key`, `adguardhome/conf/AdGuardHome.yaml`, `npm/database.sqlite`, `npm/keys.json` byte-identical (sha256). Test copy deleted afterwards.
+
 ## Data and backup
 
 - `${DATA_ROOT}/dockhand/` holds Dockhand's database, **including the encrypted stack variables and their key**. Without it, a migration loses every stack secret.
@@ -74,5 +92,6 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 - [x] Container port `3000` (image `EXPOSE`) and data path `/app/data` confirmed; the data directory holds `db/`, `git-repos/` and `.encryption_key`.
 - [x] Git stack deploys with an encrypted secret (`stacks/trek`, 2026-11-12).
 - [ ] Change, push and sync an existing Git stack.
-- [ ] Restore test: stop Dockhand, copy `${DATA_ROOT}/dockhand` elsewhere, start from the copy, secrets still work.
+- [x] Backup restore test of `DATA_ROOT` (files byte-identical, see Backups).
+- [ ] Full Dockhand restore: start Dockhand from a restored `${DATA_ROOT}/dockhand` and confirm stack secrets still decrypt.
 - [x] AdGuard + npm cutover completed 2026-11-12: DNS rewrites answer, `google.com` resolves upstream, all four npm proxy hosts reach the old media stack, media started with `docker compose start`.

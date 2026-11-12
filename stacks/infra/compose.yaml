@@ -46,6 +46,33 @@ services:
       - proxy
       - legacy-media
 
+  # Backups: web UI for restic (encrypted, deduplicated snapshots).
+  backrest:
+    image: garethgeorge/backrest:v1.14.1
+    container_name: backrest
+    # Fixed name: restic records it as the snapshot host.
+    hostname: backrest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${BACKREST_PORT:-9898}:9898"
+    environment:
+      BACKREST_DATA: /data
+      BACKREST_CONFIG: /config/config.json
+      XDG_CACHE_HOME: /cache
+      TMPDIR: /tmp
+      TZ: ${TZ:-Etc/UTC}
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/backrest/data:/data
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/backrest/config:/config
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/backrest/cache:/cache
+      # Sources are read-only: backups can never modify live data.
+      - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}:/userdata/homelab-data:ro
+      # shortcut: old media stack folder (configs, .env), until media lives in stacks/media.
+      # The backup plan excludes its data/ (films, downloads).
+      - ${LEGACY_MEDIA_ROOT:?Set LEGACY_MEDIA_ROOT in hosts/<host>.env}:/userdata/legacy-media:ro
+      # Repository on a different physical disk than DATA_ROOT.
+      - ${BACKUP_ROOT:?Set BACKUP_ROOT in hosts/<host>.env}:/repos
+
 networks:
   # Shared network: each stack attaches only its web service so npm can reach it by container name.
   proxy:
