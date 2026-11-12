@@ -30,8 +30,10 @@ Check services by container name on the `proxy` network, not by `*.home` (that w
 | Backrest | `http://backrest:9898` |
 | AdGuard | `http://adguardhome:3000` |
 | npm | `http://npm:81` |
+| Prowlarr | `http://prowlarr:9696/ping` |
+| Bazarr | `http://bazarr:6767` |
 
-Add one DNS monitor (`jellyfin.home` against the host IP) to cover AdGuard itself.
+One DNS monitor resolves `jellyfin.home` against the host IP (`192.168.1.10`) to cover AdGuard itself.
 
 ## Data and backup
 
@@ -39,6 +41,6 @@ Add one DNS monitor (`jellyfin.home` against the host IP) to cover AdGuard itsel
 
 ## Checklist
 
-- [ ] Deployed as a Git stack; `status.home` answers.
-- [ ] Monitors for every service above are green.
+- [x] Deployed as a Git stack (2026-11-12); `status.home` answers through npm. Database: SQLite (chosen at first start).
+- [x] Monitors for every service above, plus Prowlarr, Bazarr and the DNS check, are green (12/12, 2026-11-12). Two retries before a service counts as down.
 - [ ] Change → push → sync test: edit this stack's `compose.yaml`, push, sync in Dockhand, change applied.

@@ -43,7 +43,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
   | `backrest.home` | `backrest:9898` |
   | `adguard.home` | `adguardhome:3000` |
   | `npm.home` | `npm:81` |
-  | `status.home` | `uptime-kuma:3001` (pending, see `stacks/monitoring`) |
+  | `status.home` | `uptime-kuma:3001` |
 
   Admin panels reachable this way are protected only by their own logins; Dockhand is root-equivalent on the host, so use a strong password.
 - **Reverse proxy:** the Docker network `proxy` is created once per host (`docker network create proxy`; see `stacks/dockhand`). A stack attaches its web service to it and npm forwards by container name:
