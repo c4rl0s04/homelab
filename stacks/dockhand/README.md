@@ -37,5 +37,5 @@ Git access uses a fine-grained GitHub token with read-only *Contents* access to 
 - [x] Starts on Docker Desktop (2026-11-11, v1.0.57); container port `3000` and data path `/app/data` confirmed.
 - [x] Local Docker environment added; authentication enabled.
 - [x] Git stack deploys with an encrypted secret (`stacks/trek`, 2026-11-12).
-- [ ] Change, push and sync an existing Git stack.
+- [x] Change, push and sync an existing Git stack (2026-11-12, `monitoring`: new setting applied, data kept). Variable changes need a deploy; inline `configs` changes need Desmontar + Desplegar (`portal`).
 - [ ] Full restore: start Dockhand from a restored `${DATA_ROOT}/dockhand` and confirm stack secrets still decrypt.

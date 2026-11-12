@@ -25,5 +25,5 @@ Copy both folders back to `${DATA_ROOT}/trek/`, set the same `TREK_ENCRYPTION_KE
 
 - [x] Git stack deploys from `main` (commit `519afd2`, 2026-11-12); container healthy, `/api/health` ok, data under `${DATA_ROOT}/trek`.
 - [x] `TREK_ENCRYPTION_KEY` reaches the container (64 chars) and appears nowhere in the repository or its history.
-- [ ] Change something in `compose.yaml`, push, sync in Dockhand: the change is applied.
-- [ ] Data survives stop/start and redeploy.
+- [x] Change something in `compose.yaml`, push, sync in Dockhand: the change is applied (2026-11-12: joining the `proxy` network recreated the container).
+- [x] Data survives redeploy (2026-11-12: after that recreation the container stayed healthy on the same database in `${DATA_ROOT}/trek` and the same `TREK_ENCRYPTION_KEY`).
