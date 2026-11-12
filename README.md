@@ -2,6 +2,57 @@
 
 Git-versioned definition of a personal homelab made of independent Docker Compose stacks. Built to move from the current Windows PC to an always-on mini PC (Linux, or a Linux VM on Proxmox) with a routine procedure.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph internet["Internet"]
+    github["GitHub<br/>repo homelab"]
+    quad9["Quad9<br/>upstream DNS"]
+  end
+
+  subgraph home["Home network"]
+    router["Router<br/>DHCP hands out the host as DNS"]
+    devices["Phones, TV, PCs"]
+  end
+
+  subgraph host["Host: Windows PC today, mini PC later"]
+    subgraph s_dockhand["stack dockhand · started by hand"]
+      dockhand["Dockhand<br/>:3001"]
+    end
+    subgraph s_infra["stack infra · Dockhand Git stack"]
+      adguard["AdGuard<br/>DNS :53"]
+      npm["Nginx Proxy Manager<br/>:80 / :443"]
+      backrest["Backrest<br/>:9898"]
+    end
+    subgraph s_trek["stack trek · Dockhand Git stack"]
+      trek["TREK"]
+    end
+    subgraph s_media["streaming · old repo, observed only"]
+      media["Jellyfin, Radarr, qBittorrent, VPN"]
+    end
+    data[("DATA_ROOT<br/>app data + Dockhand key")]
+    backups[("BACKUP_ROOT<br/>encrypted restic repo")]
+  end
+
+  router -. DHCP .-> devices
+  devices -- "DNS: app.home" --> adguard
+  adguard -- "DNS over HTTPS" --> quad9
+  devices -- "http: app.home" --> npm
+  npm -- "network proxy" --> trek
+  npm -- "network streaming_default" --> media
+  github -- "compose files" --> dockhand
+  dockhand -- deploys --> s_infra
+  dockhand -- deploys --> s_trek
+  dockhand --> data
+  s_infra --> data
+  trek --> data
+  data -- "read-only, every 24 h" --> backrest
+  backrest --> backups
+```
+
+Recipes live in Git, secrets in Dockhand, data in `DATA_ROOT`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
+
 ## Layout
 
 ```text

@@ -8,6 +8,10 @@ Read `README.md` first: it defines the stack layout, layers and portability rule
 - The live media stack still runs from the previous repository (`c4rl0s04/previous-project`, local `<old-project>`, Compose project `streaming`). Do not stop, adopt, redeploy or modify it from here. It moves to `stacks/media` only through a planned cutover: stop old stack, copy its `configs/` into `${DATA_ROOT}/media`, start the new stack, verify, keep the old one as rollback.
 - No custom control panel or orchestration code: use Dockhand, the native application UIs and standard backup tooling.
 
+## Documentation
+
+- The Mermaid diagram in `README.md` is the architecture map. Update it in the same change that adds, removes or moves a stack, a service, a published port, a Docker network or a data path. Keep it to what is actually deployed; planned stacks stay in the layout list only.
+
 ## Safety
 
 - Secrets, host files (`hosts/*.env` except the example) and application data never enter Git.
