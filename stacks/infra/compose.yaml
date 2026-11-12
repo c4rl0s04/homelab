@@ -50,6 +50,8 @@ services:
   backrest:
     image: garethgeorge/backrest:v1.14.1
     container_name: backrest
+    # Fixed name: restic records it as the snapshot host.
+    hostname: backrest
     restart: unless-stopped
     ports:
       - "127.0.0.1:${BACKREST_PORT:-9898}:9898"
