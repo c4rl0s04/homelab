@@ -112,3 +112,4 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 - [x] Backup restore test of `DATA_ROOT` (files byte-identical, see Backups).
 - [x] AdGuard + npm cutover completed 2026-11-12: DNS rewrites answer, `google.com` resolves upstream, all four npm proxy hosts reach the old media stack.
 - [x] Registered and deployed as a Dockhand Git stack (2026-11-12). The hand-started project had to be removed first (`docker compose down`): Dockhand refuses a Git stack whose name matches an existing untracked one. Verified afterwards: AdGuard answers `jellyfin.home` and `google.com`, all four npm proxy hosts respond, Backrest keeps its plan and read-only mounts.
+- [x] `*.home` names (2026-11-12): AdGuard wildcard rewrite added (any `<name>.home` answers the host IP); npm proxy hosts for all nine names in the table above respond through `192.168.1.10:80`.
