@@ -6,52 +6,52 @@ Git-versioned definition of a personal homelab made of independent Docker Compos
 
 ```mermaid
 flowchart LR
-  subgraph internet["Internet"]
-    github["GitHub<br/>repo homelab"]
-    quad9["Quad9<br/>upstream DNS"]
+  git[("GitHub<br/>stack recipes")]
+
+  subgraph DOCKHAND["dockhand · started by hand"]
+    dockhand["Dockhand<br/>control panel"]
   end
 
-  subgraph home["Home network"]
-    router["Router<br/>DHCP hands out the host as DNS"]
-    devices["Phones, TV, PCs"]
+  subgraph INFRA["infra · shared by every stack"]
+    adguard["AdGuard<br/>home DNS"]
+    npm["Nginx Proxy Manager<br/>*.home names"]
+    backrest["Backrest<br/>backups"]
   end
 
-  subgraph host["Host: Windows PC today, mini PC later"]
-    subgraph s_dockhand["stack dockhand · started by hand"]
-      dockhand["Dockhand<br/>:3001"]
-    end
-    subgraph s_infra["stack infra · Dockhand Git stack"]
-      adguard["AdGuard<br/>DNS :53"]
-      npm["Nginx Proxy Manager<br/>:80 / :443"]
-      backrest["Backrest<br/>:9898"]
-    end
-    subgraph s_trek["stack trek · Dockhand Git stack"]
-      trek["TREK"]
-    end
-    subgraph s_media["streaming · old repo, observed only"]
-      media["Jellyfin, Radarr, qBittorrent, VPN"]
-    end
-    data[("DATA_ROOT<br/>app data + Dockhand key")]
-    backups[("BACKUP_ROOT<br/>encrypted restic repo")]
+  subgraph TREK["trek"]
+    trek["TREK<br/>travel planner"]
   end
 
-  router -. DHCP .-> devices
-  devices -- "DNS: app.home" --> adguard
-  adguard -- "DNS over HTTPS" --> quad9
-  devices -- "http: app.home" --> npm
-  npm -- "network proxy" --> trek
-  npm -- "network streaming_default" --> media
-  github -- "compose files" --> dockhand
-  dockhand -- deploys --> s_infra
-  dockhand -- deploys --> s_trek
-  dockhand --> data
-  s_infra --> data
-  trek --> data
-  data -- "read-only, every 24 h" --> backrest
-  backrest --> backups
+  subgraph MEDIA["streaming · old repo, not migrated yet"]
+    media["Jellyfin · Radarr<br/>qBittorrent · VPN"]
+  end
+
+  data[("homelab-data<br/>app data")]
+  backups[("homelab-backups<br/>other disk")]
+
+  git --> dockhand
+  dockhand -- deploys --> INFRA
+  dockhand -- deploys --> TREK
+  INFRA & TREK --> data
+  data -- every 24 h --> backups
+
+  classDef manager fill:#ccfbf1,stroke:#0f766e,color:#042f2e
+  classDef infra fill:#e0e7ff,stroke:#4338ca,color:#1e1b4b
+  classDef trek fill:#fef3c7,stroke:#b45309,color:#451a03
+  classDef media fill:#ffe4e6,stroke:#be123c,color:#4c0519
+  classDef storage fill:#f1f5f9,stroke:#475569,color:#0f172a
+  class dockhand manager
+  class adguard,npm,backrest infra
+  class trek trek
+  class media media
+  class git,data,backups storage
+  style DOCKHAND fill:#f0fdfa,stroke:#0f766e,color:#042f2e
+  style INFRA fill:#eef2ff,stroke:#4338ca,color:#1e1b4b
+  style TREK fill:#fffbeb,stroke:#b45309,color:#451a03
+  style MEDIA fill:#fff1f2,stroke:#be123c,color:#4c0519,stroke-dasharray: 5 4
 ```
 
-Recipes live in Git, secrets in Dockhand, data in `DATA_ROOT`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
+One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-data` (`DATA_ROOT`), copies in `homelab-backups` (`BACKUP_ROOT`). Network details (DNS, `*.home`, Docker networks) are in `stacks/infra/README.md`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
 
 ## Layout
 
