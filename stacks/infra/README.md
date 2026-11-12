@@ -8,7 +8,7 @@ Shared infrastructure used by every stack. **Managed by Dockhand as a Git stack*
 | Nginx Proxy Manager | Reverse proxy on 80/443: forwards `*.home` to each stack's web service | `:${NPM_ADMIN_PORT:-81}` | Running |
 | Backrest | Encrypted, deduplicated backups (restic) of `DATA_ROOT` and the old media folder | `127.0.0.1:${BACKREST_PORT:-9898}` | Running |
 
-Planned here later: Tailscale, Homarr (optional portal).
+Planned later: Tailscale; portal and other apps get their own stacks (see the roadmap in the root README).
 
 ## Deploy with Dockhand
 
@@ -43,6 +43,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
   | `backrest.home` | `backrest:9898` |
   | `adguard.home` | `adguardhome:3000` |
   | `npm.home` | `npm:81` |
+  | `status.home` | `uptime-kuma:3001` (pending, see `stacks/monitoring`) |
 
   Admin panels reachable this way are protected only by their own logins; Dockhand is root-equivalent on the host, so use a strong password.
 - **Reverse proxy:** the Docker network `proxy` is created once per host (`docker network create proxy`; see `stacks/dockhand`). A stack attaches its web service to it and npm forwards by container name:

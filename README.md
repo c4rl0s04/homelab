@@ -22,6 +22,10 @@ flowchart LR
     trek["TREK<br/>travel planner"]
   end
 
+  subgraph MONITORING["monitoring"]
+    kuma["Uptime Kuma<br/>alerts when a service is down"]
+  end
+
   subgraph MEDIA["media"]
     media["Jellyfin · Radarr<br/>qBittorrent · VPN"]
   end
@@ -33,7 +37,8 @@ flowchart LR
   dockhand -- deploys --> INFRA
   dockhand -- deploys --> TREK
   dockhand -- deploys --> MEDIA
-  INFRA & TREK & MEDIA --> data
+  dockhand -- deploys --> MONITORING
+  INFRA & TREK & MEDIA & MONITORING --> data
   MEDIA --> films[("films and downloads<br/>MEDIA_ROOT")]
   data -- every 24 h --> backups
 
@@ -41,16 +46,19 @@ flowchart LR
   classDef infra fill:#e0e7ff,stroke:#4338ca,color:#1e1b4b
   classDef trek fill:#fef3c7,stroke:#b45309,color:#451a03
   classDef media fill:#ffe4e6,stroke:#be123c,color:#4c0519
+  classDef monitoring fill:#dcfce7,stroke:#15803d,color:#052e16
   classDef storage fill:#f1f5f9,stroke:#475569,color:#0f172a
   class dockhand manager
   class adguard,npm,backrest infra
   class trek trek
   class media media
+  class kuma monitoring
   class git,data,backups,films storage
   style DOCKHAND fill:#f0fdfa,stroke:#0f766e,color:#042f2e
   style INFRA fill:#eef2ff,stroke:#4338ca,color:#1e1b4b
   style TREK fill:#fffbeb,stroke:#b45309,color:#451a03
   style MEDIA fill:#fff1f2,stroke:#be123c,color:#4c0519
+  style MONITORING fill:#f0fdf4,stroke:#15803d,color:#052e16
 ```
 
 One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-data` (`DATA_ROOT`), copies in `homelab-backups` (`BACKUP_ROOT`). Network details (DNS, `*.home`, Docker networks) are in `stacks/infra/README.md`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
@@ -63,6 +71,7 @@ stacks/
   infra/    # AdGuard (DNS), Nginx Proxy Manager, Backrest; creates the `proxy` network; managed by Dockhand
   media/    # Jellyfin, Jellyseerr, Radarr, Prowlarr, Bazarr, qBittorrent behind ProtonVPN
   trek/     # TREK travel planner; first Git stack (pilot)
+  monitoring/ # Uptime Kuma: checks every service, separate so it survives other stacks' redeploys
   photos/   # planned: Immich candidate
   paas/     # planned: Coolify/Dokploy, on its own host/VM, not managed by Dockhand
 hosts/
@@ -107,7 +116,21 @@ Each stack folder holds:
 ## Management
 
 - **Dockhand** (`stacks/dockhand`) is the control panel. Each other stack is registered as a Git stack pointing at `stacks/<name>/compose.yaml`; host values and secrets are Dockhand stack variables. Change a Compose file, push, then sync/redeploy in Dockhand.
-- **Homarr** is an optional later portal with links and read-only widgets.
+- **Portal** (one page with every app and read-only widgets): candidate not chosen yet (Homepage, Homarr, Dashy, Glance).
+
+## Roadmap
+
+Planned, not deployed. Each becomes its own stack when started.
+
+| Item | Status | Waits for |
+| --- | --- | --- |
+| Portal | Choosing the tool | Owner choice |
+| Vaultwarden (`vault`), homelab passwords only | Planned | HTTPS: Bitwarden clients refuse plain HTTP; serve it through Tailscale HTTPS or a trusted local certificate |
+| Tailscale (remote access to `*.home`) | Client installed on the Windows host | Subnet route or DNS setup |
+| Immich (`photos`) | Postponed | Photo storage location and an offsite backup (photos are irreplaceable) |
+| Home Assistant (`home`) + extras (Mushroom, Bubble Card, Adaptive Lighting, Powercalc) | Postponed | Mini PC: needs host networking for device discovery (WiZ, HomeKit), which Docker Desktop on Windows does not give |
+| Zigbee2MQTT | Only if Zigbee devices are bought | Home Assistant and a USB Zigbee adapter |
+| Offsite backup copy | Pending | Destination choice |
 
 ## Moving to a new host
 
