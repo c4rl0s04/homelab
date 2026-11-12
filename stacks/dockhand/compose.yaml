@@ -16,3 +16,12 @@ services:
       - ${DATA_ROOT:?Set DATA_ROOT in hosts/<host>.env}/dockhand:/app/data
     environment:
       TZ: ${TZ:-Etc/UTC}
+    networks:
+      - default
+      - proxy # dockhand.home through Nginx Proxy Manager
+
+networks:
+  # Shared network, created once per host: `docker network create proxy`.
+  proxy:
+    name: proxy
+    external: true

@@ -19,8 +19,11 @@ services:
       - SETGID
       - KILL # lets dumb-init forward SIGTERM for a graceful shutdown
     ports:
-      # Loopback only during the pilot; moves behind the reverse proxy later.
+      # Loopback only; other devices use trek.home through Nginx Proxy Manager.
       - "127.0.0.1:${TREK_PORT:-3002}:3000"
+    networks:
+      - default
+      - proxy
     volumes:
       - ${DATA_ROOT:?Set DATA_ROOT}/trek/data:/app/data
       - ${DATA_ROOT:?Set DATA_ROOT}/trek/uploads:/app/uploads
@@ -29,7 +32,7 @@ services:
       PORT: "3000"
       TZ: ${TZ:-Etc/UTC}
       ENCRYPTION_KEY: ${TREK_ENCRYPTION_KEY:?Set TREK_ENCRYPTION_KEY}
-      ALLOWED_ORIGINS: ${TREK_ALLOWED_ORIGINS:-http://127.0.0.1:3002}
+      ALLOWED_ORIGINS: ${TREK_ALLOWED_ORIGINS:-http://trek.home,http://127.0.0.1:3002}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 30s
@@ -41,3 +44,9 @@ services:
       options:
         max-size: 10m
         max-file: "3"
+
+networks:
+  # Shared network from infra: Nginx Proxy Manager serves trek.home through it.
+  proxy:
+    name: proxy
+    external: true
