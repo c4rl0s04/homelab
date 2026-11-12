@@ -1,0 +1,152 @@
+name: media
+
+# Same image digests and the same container paths as the old `streaming` stack,
+# so every application keeps its configuration (paths, download clients, libraries).
+x-linuxserver-env: &lsio-env
+  PUID: ${PUID:-1000}
+  PGID: ${PGID:-1000}
+  TZ: ${TZ:-Etc/UTC}
+
+services:
+  # VPN gateway (ProtonVPN, WireGuard). qBittorrent shares its network: no VPN, no traffic.
+  gluetun:
+    image: qmcgaw/gluetun@sha256:945d325be5c2abe50b89c84791b51a4e3d039737ed3703b2482c1e2b396e8fbe
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      VPN_SERVICE_PROVIDER: protonvpn
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: ${PROTON_WG_PRIVATE_KEY:?Set PROTON_WG_PRIVATE_KEY}
+      SERVER_COUNTRIES: Spain
+      PORT_FORWARD_ONLY: "on"
+      VPN_PORT_FORWARDING: "on"
+      VPN_PORT_FORWARDING_PROVIDER: protonvpn
+      VPN_PORT_FORWARDING_STATUS_FILE: /tmp/gluetun/forwarded_port
+      FIREWALL_INPUT_PORTS: "8080"
+      TZ: ${TZ:-Etc/UTC}
+    ports:
+      - "8080:8080" # qBittorrent web UI
+    volumes:
+      - gluetun_port:/tmp/gluetun
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent@sha256:97333cc1ccf903e0bbcd8eb67e3332e4970e9c1ecabe145e499e9c0847ebcaed
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      <<: *lsio-env
+      WEBUI_PORT: "8080"
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT}/media/qbittorrent:/config
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}/downloads:/downloads
+    restart: unless-stopped
+
+  # Keeps qBittorrent's listening port equal to the port ProtonVPN forwards.
+  qb-port-sync:
+    image: ghcr.io/hononeko/qbit-gluetun-sync@sha256:e69e3386cab88c1c7d25d9ca9479491e7bc3dfd02dd6acbf25d76f0523406f32
+    container_name: qb-port-sync
+    network_mode: "service:gluetun"
+    environment:
+      QBIT_ADDR: http://127.0.0.1:8080
+      QBIT_API_KEY: "Bearer ${QBIT_API_KEY:?Set QBIT_API_KEY}"
+      QBIT_API_KEY_HEADER: Authorization
+      PORT_FILE: /tmp/gluetun/forwarded_port
+      QBIT_DISABLE_UPNP: "true"
+      SYNC_INTERVAL: 5m
+      LISTEN_ADDR: 127.0.0.1
+    volumes:
+      - gluetun_port:/tmp/gluetun:ro
+    depends_on:
+      gluetun:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_started
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr@sha256:cfbc4fa09dc9d78f7cedc898f4ec48c6277cacedc523c4e159db6ff1c741959c
+    container_name: radarr
+    environment: *lsio-env
+    ports:
+      - "7878:7878"
+    volumes:
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}:/data
+      - ${DATA_ROOT:?Set DATA_ROOT}/media/radarr:/config
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}/downloads:/downloads
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}/media/movies:/movies
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr@sha256:f9151e5bc1025c6d0a630d503210cdcb6bb55a7cc098562609d96a408d838902
+    container_name: prowlarr
+    environment: *lsio-env
+    ports:
+      - "9696:9696"
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT}/media/prowlarr:/config
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin@sha256:357724bf0ae27a672c7cbaa899db2d9abeb13dbd8657ccce750258a4c059d037
+    container_name: jellyfin
+    environment: *lsio-env
+    ports:
+      - "8096:8096" # TV and phone apps connect here directly
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT}/media/jellyfin:/config
+      # Explicit bind instead of the image's anonymous volume, so the cache survives recreation.
+      - ${DATA_ROOT:?Set DATA_ROOT}/media/jellyfin-cache:/cache
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}/media:/media
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr@sha256:4538137bc5af902dece165f2bf73776d9cf4eafb6dd714670724af8f3eb77764
+    container_name: jellyseerr
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+    ports:
+      - "5055:5055"
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT}/media/jellyseerr:/app/config
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr@sha256:c1673816321156b904af9b7e6415ea547ae9622e4acc375358f1e1eb9ed1e904
+    container_name: bazarr
+    environment: *lsio-env
+    ports:
+      - "6767:6767"
+    volumes:
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}:/data
+      - ${DATA_ROOT:?Set DATA_ROOT}/media/bazarr:/config
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}/media/movies:/movies
+      - ${MEDIA_ROOT:?Set MEDIA_ROOT}/media:/media
+    restart: unless-stopped
+
+  # Solves Cloudflare challenges for Prowlarr indexers.
+  byparr:
+    image: ghcr.io/thephaseless/byparr@sha256:874f719518f617d03a60e03411fc5d090647e1a877041e81f8dc965927c7deb6
+    container_name: byparr
+    environment:
+      LOG_LEVEL: info
+    ports:
+      - "8191:8191"
+    restart: unless-stopped
+
+volumes:
+  gluetun_port:
+
+networks:
+  # The whole stack lives on infra's shared network: Nginx Proxy Manager reaches jellyfin,
+  # radarr, jellyseerr and gluetun (qBittorrent) by name, and gluetun keeps a single
+  # network interface, the setup its firewall was verified with.
+  default:
+    name: proxy
+    external: true
