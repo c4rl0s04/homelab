@@ -4,8 +4,9 @@ Shared infrastructure used by every stack. **Managed by Dockhand as a Git stack*
 
 | Service | Purpose | Admin UI | Status |
 | --- | --- | --- | --- |
-| AdGuard Home | Home DNS: ad blocking and `*.home` names (DNS rewrites) for every device | `:${ADGUARD_UI_PORT:-3000}` | Running |
-| Nginx Proxy Manager | Reverse proxy on 80/443: forwards `*.home` to each stack's web service | `:${NPM_ADMIN_PORT:-81}` | Running |
+| AdGuard Home | Home DNS: ad blocking and `*.casa.home` names (DNS rewrites) for every device | `127.0.0.1:${ADGUARD_UI_PORT:-3000}` | Running |
+| Nginx Proxy Manager | Reverse proxy on 80/443: forwards `*.casa.home` to each stack's web service | `:${NPM_ADMIN_PORT:-81}` | Running |
+| Tinyauth | One shared login for the web UIs (npm asks it before serving a protected name) | `auth.casa.home` | Running |
 | Backrest | Encrypted, deduplicated backups (restic) of `DATA_ROOT` and the old media folder | `127.0.0.1:${BACKREST_PORT:-9898}` | Running |
 
 Planned later: Tailscale; portal and other apps get their own stacks (see the roadmap in the root README).
@@ -26,29 +27,50 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
 
 ## How other stacks use it
 
-- **DNS** works at network level: the router hands out this host as DNS server, and AdGuard rewrites `<app>.home` to the host IP. Keep a fallback resolver in the router (e.g. `1.1.1.1`) so the home network survives if this host is down.
+- **DNS** works at network level: the router hands out this host as DNS server, and AdGuard rewrites `<app>.casa.home` to the host IP. Keep a fallback resolver in the router (e.g. `1.1.1.1`) so the home network survives if this host is down.
 - **Upstream DNS uses an IP literal** (`https://9.9.9.10/dns-query`, Quad9 unfiltered). On the Windows PC, ProtonVPN blocks plain DNS to anything but its own resolver, so AdGuard could not bootstrap `dns10.quad9.net` by name. The Windows host itself also cannot query AdGuard while ProtonVPN is connected; other devices can. Revisit on the mini PC (no desktop VPN there).
-- **Router DHCP** (`192.168.1.1`) currently hands out `192.168.1.10, 1.1.1.1`. Devices may pick `1.1.1.1`, which does not know `*.home` (confirmed 2026-11-12: a phone works with DNS set manually to `192.168.1.10`). Kept on purpose while AdGuard runs on a PC that is not always on; remove `1.1.1.1` once the mini PC hosts DNS. Reserve the host's IP in the router so the DNS address never changes.
+- **Router DHCP** (`192.168.1.1`) currently hands out `192.168.1.10, 1.1.1.1`. Devices may pick `1.1.1.1`, which does not know these names (confirmed 2026-11-12: a phone works with DNS set manually to `192.168.1.10`). Kept on purpose while AdGuard runs on a PC that is not always on; remove `1.1.1.1` once the mini PC hosts DNS. Reserve the host's IP in the router so the DNS address never changes.
 - **Port 53 on Windows:** the "Internet Connection Sharing" service (`SharedAccess`, used by Mobile Hotspot) can grab UDP 53 on IPv4; AdGuard then only gets IPv6 and LAN devices are answered by Windows instead. Stop it (`Stop-Service SharedAccess`, admin) and recreate `adguardhome`; disable it if the hotspot is not used.
-- **Names:** a single AdGuard rewrite `*.home → <host IP>` covers every name; npm then maps each name to a container:
+- **Names:** the AdGuard rewrite `*.home → <host IP>` covers every `<app>.casa.home`; npm maps each name to a container. Names use two labels before `home` because the shared login cookie needs a parent domain (`casa.home`); with plain `*.home` Tinyauth limits the cookie to `auth.home` (tested 2026-11-13). The old `*.home` proxy hosts were removed.
 
-  | Name | Target |
-  | --- | --- |
-  | `jellyfin.home` | `jellyfin:8096` |
-  | `jellyseer.home` | `jellyseerr:5055` |
-  | `radarr.home` | `radarr:7878` |
-  | `qbit.home` | `gluetun:8080` |
-  | `trek.home` | `trek:3000` |
-  | `dockhand.home` | `dockhand:3000` |
-  | `backrest.home` | `backrest:9898` |
-  | `adguard.home` | `adguardhome:3000` |
-  | `npm.home` | `npm:81` |
-  | `status.home` | `uptime-kuma:3001` |
-  | `portal.home` | `homepage:3000` |
-  | `prowlarr.home` | `prowlarr:9696` |
-  | `bazarr.home` | `bazarr:6767` |
+  | Name | Target | Login |
+  | --- | --- | --- |
+  | `portal.casa.home` | `homepage:3000` | Tinyauth |
+  | `radarr.casa.home` | `radarr:7878` | Tinyauth |
+  | `prowlarr.casa.home` | `prowlarr:9696` | Tinyauth |
+  | `bazarr.casa.home` | `bazarr:6767` | Tinyauth |
+  | `qbit.casa.home` | `gluetun:8080` | Tinyauth |
+  | `status.casa.home` | `uptime-kuma:3001` | Tinyauth |
+  | `backrest.casa.home` | `backrest:9898` | Tinyauth |
+  | `adguard.casa.home` | `adguardhome:3000` | Tinyauth |
+  | `dockhand.casa.home` | `dockhand:3000` | Tinyauth, then Dockhand's own (root-equivalent: two locks) |
+  | `jellyfin.casa.home` | `jellyfin:8096` | Jellyfin's own (TV and phone apps cannot use Tinyauth) |
+  | `jellyseer.casa.home` | `jellyseerr:5055` | Jellyfin account |
+  | `trek.casa.home` | `trek:3000` | TREK's own accounts (shared with other people) |
+  | `npm.casa.home` | `npm:81` | npm's own: it configures Tinyauth, so it must not depend on it |
+  | `auth.casa.home` | `tinyauth:3000` | The login page itself |
 
-  Admin panels reachable this way are protected only by their own logins; Dockhand is root-equivalent on the host, so use a strong password.
+- **Shared login (Tinyauth):** a protected proxy host has this in npm → Edit → Advanced. Before serving a page, npm asks Tinyauth (`auth_request`); Tinyauth answers 200 when the browser's session cookie is valid, otherwise 401 with the login address, which npm turns into a redirect. Users live in `${DATA_ROOT}/tinyauth/users.txt` (`docker run --rm -it ghcr.io/tinyauthapp/tinyauth:v5.2.0 user create --interactive`, paste the line, redeploy). Sessions last 7 days (`TINYAUTH_SESSION_SECONDS`). Apps behind it have their own login turned off; their ports are published on `127.0.0.1` only so the LAN cannot bypass it. If Tinyauth is down, protected names stop answering; from the host each app still opens at `127.0.0.1:<port>`.
+
+  ```nginx
+  location / {
+    include conf.d/include/proxy.conf;
+    auth_request /tinyauth;
+    auth_request_set $redirection_url $upstream_http_x_tinyauth_location;
+    error_page 401 403 =302 $redirection_url;
+  }
+  location /tinyauth {
+    internal;
+    proxy_pass http://tinyauth:3000/api/auth/nginx;
+    proxy_pass_request_body off;
+    proxy_set_header content-length "";
+    proxy_set_header x-original-url $scheme://$host$request_uri;
+    proxy_set_header x-original-method $request_method;
+    proxy_set_header x-forwarded-for $proxy_add_x_forwarded_for;
+    proxy_set_header x-real-ip $remote_addr;
+  }
+  ```
+
 - **Reverse proxy:** the Docker network `proxy` is created once per host (`docker network create proxy`; see `stacks/dockhand`). A stack attaches its web service to it and npm forwards by container name:
 
   ```yaml
@@ -60,7 +82,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
       external: true
   ```
 
-  Then add a proxy host in npm (`app.home` → `http://<container_name>:<port>`) and a DNS rewrite in AdGuard if no wildcard covers it.
+  Then add a proxy host in npm (`app.casa.home` → `http://<container_name>:<port>`), with the Tinyauth block above unless the app keeps its own login.
 - The media stack joins `proxy` entirely, so npm reaches `jellyfin`, `radarr`, `jellyseerr` and `gluetun` (qBittorrent) by container name.
 
 ## Cutover from the old media stack (AdGuard + npm), done 2026-11-12

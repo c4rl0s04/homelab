@@ -6,7 +6,7 @@ Migrated from the old `streaming` stack (`<old-project>`, repo `previous-project
 
 ## Requires
 
-- `infra` deployed first: this stack joins its `proxy` network, where Nginx Proxy Manager forwards `jellyfin.home`, `radarr.home`, `qbit.home` (to `gluetun:8080`) and `jellyseer.home`.
+- `infra` deployed first: this stack joins its `proxy` network, where Nginx Proxy Manager forwards `jellyfin`, `jellyseer`, `radarr`, `prowlarr`, `bazarr` and `qbit` (to `gluetun:8080`) under `*.casa.home`. Only Jellyfin publishes its port to the LAN (TV and phone apps); the other web UIs listen on `127.0.0.1` and are reached through npm and Tinyauth.
 
 ## Deploy with Dockhand
 

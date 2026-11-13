@@ -16,7 +16,7 @@ Then:
 docker compose --env-file ../../hosts/<host>.env up -d
 ```
 
-Open `http://dockhand.home` (or `http://127.0.0.1:${DOCKHAND_PORT:-3001}` from the host itself, which also works before `infra` is up).
+Open `http://dockhand.casa.home` (Tinyauth, then Dockhand's own login) (or `http://127.0.0.1:${DOCKHAND_PORT:-3001}` from the host itself, which also works before `infra` is up).
 
 ## What it manages
 
