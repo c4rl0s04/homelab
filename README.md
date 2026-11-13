@@ -14,7 +14,8 @@ flowchart LR
 
   subgraph INFRA["infra · shared by every stack"]
     adguard["AdGuard<br/>home DNS"]
-    npm["Nginx Proxy Manager<br/>*.home names"]
+    npm["Nginx Proxy Manager<br/>*.casa.home names"]
+    tinyauth["Tinyauth<br/>one login"]
     backrest["Backrest<br/>backups"]
   end
 
@@ -55,7 +56,7 @@ flowchart LR
   classDef portal fill:#e0f2fe,stroke:#0369a1,color:#082f49
   classDef storage fill:#f1f5f9,stroke:#475569,color:#0f172a
   class dockhand manager
-  class adguard,npm,backrest infra
+  class adguard,npm,backrest,tinyauth infra
   class trek trek
   class media media
   class kuma monitoring
@@ -69,7 +70,7 @@ flowchart LR
   style PORTAL fill:#f0f9ff,stroke:#0369a1,color:#082f49
 ```
 
-One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-data` (`DATA_ROOT`), copies in `homelab-backups` (`BACKUP_ROOT`). Network details (DNS, `*.home`, Docker networks) are in `stacks/infra/README.md`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
+One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-data` (`DATA_ROOT`), copies in `homelab-backups` (`BACKUP_ROOT`). Network details (DNS, `*.casa.home`, the shared login, Docker networks) are in `stacks/infra/README.md`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
 
 ## Layout
 
@@ -117,7 +118,7 @@ Each stack folder holds:
 - Paths, `PUID`/`PGID` and `TZ` come from the host file. A missing variable fails (`${VAR:?...}`) instead of falling back to a path.
 - Bind mounts under `DATA_ROOT`, not anonymous volumes: copying a folder copies a stack's state.
 - Every Compose file sets `name:` so the project name does not depend on its folder.
-- Services are reached by hostname through the reverse proxy and local DNS, not `IP:port`.
+- Services are reached by hostname through the reverse proxy and local DNS, not `IP:port`. Web UIs protected by Tinyauth publish their port on `127.0.0.1` only, so the LAN cannot bypass the login.
 - No Docker Desktop–only features (`host.docker.internal`, Windows paths, named pipes).
 - One manager per stack: Dockhand manages everything except itself (`dockhand/`, by hand) and `paas/` (its own platform).
 - Dockhand holds the Docker socket (root-equivalent): reachable only over LAN/Tailscale with authentication, never from the internet.
@@ -125,7 +126,7 @@ Each stack folder holds:
 ## Management
 
 - **Dockhand** (`stacks/dockhand`) is the control panel. Each other stack is registered as a Git stack pointing at `stacks/<name>/compose.yaml`; host values and secrets are Dockhand stack variables. Change a Compose file, push, then sync/redeploy in Dockhand.
-- **Portal** (`stacks/portal`, `portal.home`): Homepage, configured in Git. Read-only: links, status and widgets; it never changes a stack.
+- **Portal** (`stacks/portal`, `portal.casa.home`): Homepage, configured in Git. Read-only: links, status and widgets; it never changes a stack.
 
 ## Roadmap
 
@@ -134,7 +135,7 @@ Planned, not deployed. Each becomes its own stack when started.
 | Item | Status | Waits for |
 | --- | --- | --- |
 | Vaultwarden (`vault`), homelab passwords only | Planned | HTTPS: Bitwarden clients refuse plain HTTP; serve it through Tailscale HTTPS or a trusted local certificate |
-| Tailscale (remote access to `*.home`) | Client installed on the Windows host | Subnet route or DNS setup |
+| Tailscale (remote access to `*.casa.home`) | Client installed on the Windows host | Subnet route or DNS setup |
 | Immich (`photos`) | Postponed | Photo storage location and an offsite backup (photos are irreplaceable) |
 | Home Assistant (`home`) + extras (Mushroom, Bubble Card, Adaptive Lighting, Powercalc) | Postponed | Mini PC: needs host networking for device discovery (WiZ, HomeKit), which Docker Desktop on Windows does not give |
 | Zigbee2MQTT | Only if Zigbee devices are bought | Home Assistant and a USB Zigbee adapter |
@@ -146,6 +147,6 @@ Planned, not deployed. Each becomes its own stack when started.
 2. Copy the homelab folder (`repo`, `data`, `media`), or clone the repository and restore `data` from backup (it includes Dockhand's data and secret key).
 3. Create `hosts/<host>.env` from `hosts/example.env` with the new paths.
 4. Create the shared network once (`docker network create proxy`), start `stacks/dockhand` by hand; in Dockhand, update `DATA_ROOT` / `MEDIA_ROOT` / `BACKUP_ROOT` on each stack and deploy `infra` first, then the rest.
-5. Repoint local DNS to the new host (router DHCP and the AdGuard `*.home` rewrite); verify every stack before retiring the old one.
+5. Repoint local DNS to the new host (router DHCP and the AdGuard `*.home` rewrite, which covers `*.casa.home`); verify every stack before retiring the old one.
 
 A stack is migration-ready only after it has been restored from backup at least once.

@@ -28,7 +28,8 @@ services:
       FIREWALL_INPUT_PORTS: "8080"
       TZ: ${TZ:-Etc/UTC}
     ports:
-      - "8080:8080" # qBittorrent web UI
+      # Loopback only: from other devices, use qbit.casa.home (behind Tinyauth).
+      - "127.0.0.1:8080:8080" # qBittorrent web UI
     volumes:
       - gluetun_port:/tmp/gluetun
     restart: unless-stopped
@@ -75,7 +76,7 @@ services:
     container_name: radarr
     environment: *lsio-env
     ports:
-      - "7878:7878"
+      - "127.0.0.1:7878:7878" # radarr.casa.home from other devices
     volumes:
       - ${MEDIA_ROOT:?Set MEDIA_ROOT}:/data
       - ${DATA_ROOT:?Set DATA_ROOT}/media/radarr:/config
@@ -88,7 +89,7 @@ services:
     container_name: prowlarr
     environment: *lsio-env
     ports:
-      - "9696:9696"
+      - "127.0.0.1:9696:9696" # prowlarr.casa.home from other devices
     volumes:
       - ${DATA_ROOT:?Set DATA_ROOT}/media/prowlarr:/config
     restart: unless-stopped
@@ -112,7 +113,7 @@ services:
     environment:
       TZ: ${TZ:-Etc/UTC}
     ports:
-      - "5055:5055"
+      - "127.0.0.1:5055:5055" # jellyseer.casa.home from other devices
     volumes:
       - ${DATA_ROOT:?Set DATA_ROOT}/media/jellyseerr:/app/config
     restart: unless-stopped
@@ -122,7 +123,7 @@ services:
     container_name: bazarr
     environment: *lsio-env
     ports:
-      - "6767:6767"
+      - "127.0.0.1:6767:6767" # bazarr.casa.home from other devices
     volumes:
       - ${MEDIA_ROOT:?Set MEDIA_ROOT}:/data
       - ${DATA_ROOT:?Set DATA_ROOT}/media/bazarr:/config
@@ -137,7 +138,7 @@ services:
     environment:
       LOG_LEVEL: info
     ports:
-      - "8191:8191"
+      - "127.0.0.1:8191:8191"
     restart: unless-stopped
 
 volumes:

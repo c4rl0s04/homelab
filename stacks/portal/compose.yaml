@@ -13,7 +13,7 @@ services:
       - "127.0.0.1:${PORTAL_PORT:-3004}:3000"
     environment:
       TZ: ${TZ:-Etc/UTC}
-      HOMEPAGE_ALLOWED_HOSTS: portal.home,127.0.0.1:${PORTAL_PORT:-3004}
+      HOMEPAGE_ALLOWED_HOSTS: portal.casa.home,127.0.0.1:${PORTAL_PORT:-3004}
       # Optional until set in Dockhand; a widget without its key shows an error, the link still works.
       HOMEPAGE_VAR_JELLYFIN_KEY: ${JELLYFIN_API_KEY:-}
       HOMEPAGE_VAR_JELLYSEERR_KEY: ${JELLYSEERR_API_KEY:-}
@@ -60,7 +60,7 @@ configs:
       - Multimedia:
           - Jellyfin:
               icon: jellyfin.png
-              href: http://jellyfin.home
+              href: http://jellyfin.casa.home
               description: Películas
               siteMonitor: http://jellyfin:8096/health
               widget:
@@ -72,7 +72,7 @@ configs:
                 enableNowPlaying: true
           - Jellyseerr:
               icon: jellyseerr.png
-              href: http://jellyseer.home
+              href: http://jellyseer.casa.home
               description: Pedir películas
               siteMonitor: http://jellyseerr:5055
               widget:
@@ -81,7 +81,7 @@ configs:
                 key: "{{HOMEPAGE_VAR_JELLYSEERR_KEY}}"
           - Radarr:
               icon: radarr.png
-              href: http://radarr.home
+              href: http://radarr.casa.home
               description: Gestión de películas
               siteMonitor: http://radarr:7878/ping
               widget:
@@ -90,12 +90,12 @@ configs:
                 key: "{{HOMEPAGE_VAR_RADARR_KEY}}"
           - qBittorrent:
               icon: qbittorrent.png
-              href: http://qbit.home
+              href: http://qbit.casa.home
               description: Descargas por VPN
               siteMonitor: http://gluetun:8080
           - Prowlarr:
               icon: prowlarr.png
-              href: http://prowlarr.home
+              href: http://prowlarr.casa.home
               description: Indexadores
               siteMonitor: http://prowlarr:9696/ping
               widget:
@@ -104,7 +104,7 @@ configs:
                 key: "{{HOMEPAGE_VAR_PROWLARR_KEY}}"
           - Bazarr:
               icon: bazarr.png
-              href: http://bazarr.home
+              href: http://bazarr.casa.home
               description: Subtítulos
               siteMonitor: http://bazarr:6767
               widget:
@@ -114,33 +114,33 @@ configs:
       - Apps:
           - TREK:
               icon: mdi-map-marker-path
-              href: http://trek.home
+              href: http://trek.casa.home
               description: Viajes
               siteMonitor: http://trek:3000/api/health
       - Sistema:
           - Dockhand:
               icon: mdi-docker
-              href: http://dockhand.home
+              href: http://dockhand.casa.home
               description: Stacks y despliegues
               siteMonitor: http://dockhand:3000
           - Uptime Kuma:
               icon: uptime-kuma.png
-              href: http://status.home
+              href: http://status.casa.home
               description: Estado y avisos
               siteMonitor: http://uptime-kuma:3001
           - AdGuard:
               icon: adguard-home.png
-              href: http://adguard.home
+              href: http://adguard.casa.home
               description: DNS y bloqueo de anuncios
               siteMonitor: http://adguardhome:3000
           - Nginx Proxy Manager:
               icon: nginx-proxy-manager.png
-              href: http://npm.home
+              href: http://npm.casa.home
               description: Nombres .home
               siteMonitor: http://npm:81
           - Backrest:
               icon: backrest.png
-              href: http://backrest.home
+              href: http://backrest.casa.home
               description: Copias de seguridad
               siteMonitor: http://backrest:9898
 

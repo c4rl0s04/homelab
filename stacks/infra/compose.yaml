@@ -10,7 +10,8 @@ services:
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "${ADGUARD_UI_PORT:-3000}:3000/tcp"
+      # Loopback only: from other devices, use adguard.casa.home (behind Tinyauth).
+      - "127.0.0.1:${ADGUARD_UI_PORT:-3000}:3000/tcp"
     volumes:
       - ${DATA_ROOT:?Set DATA_ROOT}/adguardhome/work:/opt/adguardhome/work
       - ${DATA_ROOT:?Set DATA_ROOT}/adguardhome/conf:/opt/adguardhome/conf
@@ -59,6 +60,24 @@ services:
     networks:
       - default
       - proxy # backrest.home
+
+  # Single login for the web UIs: npm asks it before serving a protected *.casa.home name.
+  tinyauth:
+    image: ghcr.io/tinyauthapp/tinyauth:v5.2.0
+    container_name: tinyauth
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      # The session cookie is set for the parent domain (casa.home), so one login covers every *.casa.home name.
+      # A bare `.home` name does not work: the cookie would be limited to auth.home itself.
+      TINYAUTH_APPURL: http://auth.casa.home
+      TINYAUTH_AUTH_USERSFILE: /data/users.txt
+      TINYAUTH_AUTH_SESSIONEXPIRY: ${TINYAUTH_SESSION_SECONDS:-604800}
+    volumes:
+      # users.txt: one `user:bcrypt-hash` per line, created with `tinyauth user create --interactive`.
+      - ${DATA_ROOT:?Set DATA_ROOT}/tinyauth:/data
+    networks:
+      - proxy # auth.casa.home, and npm's auth checks (http://tinyauth:3000/api/auth/nginx)
 
 networks:
   # Shared network: every web service joins it so npm can reach it by container name.

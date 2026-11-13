@@ -1,6 +1,6 @@
 # portal
 
-[Homepage](https://github.com/gethomepage/homepage): one page with every app, its up/down status and live widgets. Open it at `http://portal.home`.
+[Homepage](https://github.com/gethomepage/homepage): one page with every app, its up/down status and live widgets. Open it at `http://portal.casa.home` (behind Tinyauth: the shared login is asked here once).
 
 ## Configuration lives in `compose.yaml`
 
@@ -28,7 +28,7 @@ Git stack `portal`: repository `homelab`, branch `main`, compose file `stacks/po
 
 The keys are optional: without one, that widget shows an error and its link and status still work. Optional: `PORTAL_PORT` (3004).
 
-npm proxy host: `portal.home` → `homepage:3000`. `HOMEPAGE_ALLOWED_HOSTS` must list every name used to open it.
+npm proxy host: `portal.casa.home` → `homepage:3000`, behind Tinyauth. `HOMEPAGE_ALLOWED_HOSTS` must list every name used to open it.
 
 ## Data and backup
 

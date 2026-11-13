@@ -13,11 +13,11 @@ Git stack `monitoring`: repository `homelab`, branch `main`, compose file `stack
 | `DATA_ROOT` | `E:/homelab/data` |
 | `TZ` | `Europe/Madrid` |
 
-Optional: `UPTIME_KUMA_PORT` (3003). After deploying, open `http://status.home` (npm proxy host `status.home` → `uptime-kuma:3001`, websockets on) and create the admin account.
+Optional: `UPTIME_KUMA_PORT` (3003). After deploying, open `http://status.casa.home` (npm proxy host → `uptime-kuma:3001`, websockets on, behind Tinyauth; its own login is disabled).
 
 ## Monitors
 
-Check services by container name on the `proxy` network, not by `*.home` (that would test DNS and npm instead of the app):
+Check services by container name on the `proxy` network, not by `*.casa.home` (that would test DNS and npm instead of the app):
 
 | Monitor | URL |
 | --- | --- |
@@ -33,7 +33,7 @@ Check services by container name on the `proxy` network, not by `*.home` (that w
 | Prowlarr | `http://prowlarr:9696/ping` |
 | Bazarr | `http://bazarr:6767` |
 
-One DNS monitor resolves `jellyfin.home` against the host IP (`192.168.1.10`) to cover AdGuard itself.
+One DNS monitor resolves `jellyfin.casa.home` against the host IP (`192.168.1.10`) to cover AdGuard itself.
 
 ## Data and backup
 
