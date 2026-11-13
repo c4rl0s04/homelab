@@ -33,6 +33,9 @@ services:
       TZ: ${TZ:-Etc/UTC}
       ENCRYPTION_KEY: ${TREK_ENCRYPTION_KEY:?Set TREK_ENCRYPTION_KEY}
       ALLOWED_ORIGINS: ${TREK_ALLOWED_ORIGINS:-http://trek.casa.home,http://127.0.0.1:3002}
+      # The homelab serves plain HTTP on the LAN: a Secure session cookie would be dropped by the browser.
+      # Set to true once trek.casa.home is served over HTTPS.
+      COOKIE_SECURE: ${TREK_COOKIE_SECURE:-false}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 30s

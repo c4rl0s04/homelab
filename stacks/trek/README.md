@@ -8,6 +8,12 @@
 2. Add the stack variables from `.env.example`. `TREK_ENCRYPTION_KEY` is a secret: generate it once and keep it only in Dockhand.
 3. **Create** only registers the stack ("no desplegado"). Press **Deploy** on its row and confirm the Git sync, then open `http://127.0.0.1:3002` and create the first account (it becomes the admin).
 
+## Access
+
+`http://trek.casa.home`, with TREK's own accounts (not behind Tinyauth). Over plain HTTP the session cookie must not be marked Secure, so `COOKIE_SECURE` defaults to `false`; set `TREK_COOKIE_SECURE=true` once the name is served over HTTPS.
+
+**First login / locked out:** the first start creates an `admin` account (`admin@trek.local`) and prints a random password to the container log only once. To get in again, run `docker exec -it -u node trek node server/reset-admin.js`: it prints a temporary password and forces a new one at first login. Run it yourself; the password appears in the terminal.
+
 ## Data and backup
 
 | Path | Content |
