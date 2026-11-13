@@ -33,7 +33,7 @@ Check services by container name on the `proxy` network, not by `*.casa.home` (t
 | Prowlarr | `http://prowlarr:9696/ping` |
 | Bazarr | `http://bazarr:6767` |
 
-One DNS monitor resolves `jellyfin.casa.home` against the host IP (`192.168.1.10`) to cover AdGuard itself.
+One DNS monitor resolves `jellyfin.casa.home` against the host IP (`192.168.1.10`) to cover AdGuard itself. It goes through the Windows host network, so it fails while ProtonVPN is connected on the host (which blocks DNS to other servers); LAN devices are not affected. Expect it to recover on the mini PC.
 
 ## Data and backup
 
