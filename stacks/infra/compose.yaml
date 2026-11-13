@@ -8,8 +8,10 @@ services:
     container_name: adguardhome
     restart: unless-stopped
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      # On Windows, Internet Connection Sharing (needed by Docker/WSL networking) holds 0.0.0.0:53/udp.
+      # Binding the LAN address explicitly wins over that wildcard. Set DNS_BIND_IP to the host's reserved LAN IP.
+      - "${DNS_BIND_IP:-0.0.0.0}:53:53/tcp"
+      - "${DNS_BIND_IP:-0.0.0.0}:53:53/udp"
       # Loopback only: from other devices, use adguard.casa.home (behind Tinyauth).
       - "127.0.0.1:${ADGUARD_UI_PORT:-3000}:3000/tcp"
     volumes:

@@ -20,6 +20,7 @@ Git stack `infra`: repository `homelab`, branch `main`, compose file `stacks/inf
 | `DATA_ROOT` | `E:/homelab/data` |
 | `BACKUP_ROOT` | `C:/homelab-backups` |
 | `TZ` | `Europe/Madrid` |
+| `DNS_BIND_IP` | `192.168.1.10` (the host's LAN IP, reserved in the router) |
 
 Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898).
 
@@ -30,7 +31,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
 - **DNS** works at network level: the router hands out this host as DNS server, and AdGuard rewrites `<app>.casa.home` to the host IP. Keep a fallback resolver in the router (e.g. `1.1.1.1`) so the home network survives if this host is down.
 - **Upstream DNS uses an IP literal** (`https://9.9.9.10/dns-query`, Quad9 unfiltered). On the Windows PC, ProtonVPN blocks plain DNS to anything but its own resolver, so AdGuard could not bootstrap `dns10.quad9.net` by name. The Windows host itself also cannot query AdGuard while ProtonVPN is connected; other devices can. Revisit on the mini PC (no desktop VPN there).
 - **Router DHCP** (`192.168.1.1`) currently hands out `192.168.1.10, 1.1.1.1`. Devices may pick `1.1.1.1`, which does not know these names (confirmed 2026-11-12: a phone works with DNS set manually to `192.168.1.10`). Kept on purpose while AdGuard runs on a PC that is not always on; remove `1.1.1.1` once the mini PC hosts DNS. Reserve the host's IP in the router so the DNS address never changes.
-- **Port 53 on Windows:** the "Internet Connection Sharing" service (`SharedAccess`, used by Mobile Hotspot) can grab UDP 53 on IPv4; AdGuard then only gets IPv6 and LAN devices are answered by Windows instead. Stop it (`Stop-Service SharedAccess`, admin) and recreate `adguardhome`; disable it if the hotspot is not used.
+- **Port 53 on Windows:** the "Internet Connection Sharing" service (`SharedAccess`) holds UDP `0.0.0.0:53` after every reboot; Docker/WSL networking relies on it, so do not disable it. AdGuard binds the LAN address instead (`DNS_BIND_IP`, e.g. `192.168.1.10:53`), which takes precedence over the wildcard (verified 2026-11-13). The address must stay fixed: reserve it in the router. On the mini PC (Linux) leave `DNS_BIND_IP` unset.
 - **Names:** the AdGuard rewrite `*.home → <host IP>` covers every `<app>.casa.home`; npm maps each name to a container. Names use two labels before `home` because the shared login cookie needs a parent domain (`casa.home`); with plain `*.home` Tinyauth limits the cookie to `auth.home` (tested 2026-11-13). The old `*.home` proxy hosts were removed.
 
   | Name | Target | Login |
