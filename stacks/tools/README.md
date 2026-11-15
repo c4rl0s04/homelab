@@ -27,6 +27,14 @@ npm proxy hosts:
 
 - PairDrop has no data. Files go device to device over WebRTC; the server only introduces them. Over plain HTTP a few browser extras are unavailable (copy button, installing it as an app, notifications); sending files works.
 - Stirling-PDF keeps settings in `${DATA_ROOT}/stirling-pdf/configs` and saved files in `${DATA_ROOT}/stirling-pdf/storage`, backed up with the rest of `DATA_ROOT`. It is a Java app: the first start takes about a minute, and it is capped at 4 GB of memory.
+- OCR languages live in `${DATA_ROOT}/stirling-pdf/tessdata`, which replaces the image's folder. The image has no Spanish, so on a new host create it before deploying:
+
+  ```bash
+  docker cp stirling-pdf:/usr/share/tesseract-ocr/5/tessdata/. "$DATA_ROOT/stirling-pdf/tessdata/"   # from a first deploy without the mount
+  curl -fL -o "$DATA_ROOT/stirling-pdf/tessdata/spa.traineddata" https://github.com/tesseract-ocr/tessdata_fast/raw/main/spa.traineddata
+  ```
+
+  It is part of `DATA_ROOT`, so a restored backup already has it.
 
 ## Checklist
 
