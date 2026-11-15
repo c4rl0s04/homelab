@@ -38,7 +38,8 @@ npm proxy hosts:
 
 ## Checklist
 
-- [ ] Deployed as a Git stack; both names answer through npm.
+- [x] Deployed as a Git stack (2026-11-15); `drop.casa.home` answers (websocket upgrade 101) and `pdf.casa.home` redirects to Tinyauth; ports 3005/3006 are not reachable from the LAN.
 - [ ] PairDrop: a phone and the PC see each other and a file goes through.
 - [ ] Stirling-PDF: opens without its own login behind Tinyauth; merge two PDFs; OCR a scanned page in Spanish.
-- [ ] Portal cards and Uptime Kuma monitors added.
+- [x] Portal cards and Uptime Kuma monitors added (2026-11-15, both green).
+- [x] Spanish OCR: `tesseract --list-langs` in the container lists `spa` (PR #25).
