@@ -95,6 +95,7 @@ E:\homelab\            (/srv/homelab on Linux)
   repo\     # this repository
   data\     # DATA_ROOT: app data, Dockhand's encrypted secrets
   media\    # MEDIA_ROOT: downloads/ and media/ (films)
+  snapshot-worktree\  # scratch checkout used by scripts/snapshot-config.sh
 C:\homelab-backups\    # BACKUP_ROOT: deliberately on another disk
 ```
 
@@ -141,6 +142,14 @@ Planned, not deployed. Each becomes its own stack when started.
 | Home Assistant (`home`) + extras (Mushroom, Bubble Card, Adaptive Lighting, Powercalc) | Postponed | Mini PC: needs host networking for device discovery (WiZ, HomeKit), which Docker Desktop on Windows does not give |
 | Zigbee2MQTT | Only if Zigbee devices are bought | Home Assistant and a USB Zigbee adapter |
 | Offsite backup copy | Pending | Destination choice |
+
+## Configuration snapshots
+
+Some settings live in app databases, not in Git: npm proxy hosts (and their Tinyauth block), AdGuard rewrites and upstreams, Uptime Kuma monitors, each app's login mode and Dockhand's stack variables. `snapshots/*.json` records them so they can be redone by hand after a rebuild.
+
+- `scripts/snapshot_config.py <DATA_ROOT>` reads the app files read-only and writes the JSON. Secret values are replaced by `<secret>` (Dockhand secrets and any variable named `*KEY*`, `*TOKEN*`, `*PASSWORD*`, `*SECRET*`); the script refuses to write output that still looks like a key or hash.
+- `scripts/snapshot-config.sh hosts/<host>.env` runs it in a separate worktree (`../snapshot-worktree`) and opens a PR "Configuration snapshot <date>" only when something changed. Run it daily and at logon (Windows: Task Scheduler; Linux: a systemd timer or cron).
+- Snapshots are a record, not a source of truth: restoring means re-entering these values in each app.
 
 ## Moving to a new host
 
