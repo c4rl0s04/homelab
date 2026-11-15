@@ -20,6 +20,15 @@ services:
     image: qmcgaw/gluetun@sha256:945d325be5c2abe50b89c84791b51a4e3d039737ed3703b2482c1e2b396e8fbe
     container_name: gluetun
     logging: *logging
+    # The image allows 10 s to connect; ProtonVPN plus port forwarding often takes longer, so qBittorrent
+    # (depends_on: service_healthy) failed to start on the first deploy. Failures during start_period do not count.
+    healthcheck:
+      test: ["CMD-SHELL", "/gluetun-entrypoint healthcheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 2m
+      start_interval: 5s
     cap_add:
       - NET_ADMIN
     devices:
