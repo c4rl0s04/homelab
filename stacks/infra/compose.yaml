@@ -1,11 +1,19 @@
 name: infra
 
+# Docker keeps container logs forever by default; cap each container at 3 x 10 MB.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
 services:
   # Home DNS: ad blocking and *.home names for every device on the network.
   adguardhome:
     # Same image digest as the previous media stack, so the moved config loads unchanged.
     image: adguard/adguardhome@sha256:aba9e3bf0613be3ba3755e1fc311b126e2c24bec25e18b6483894a88283074f0
     container_name: adguardhome
+    logging: *logging
     restart: unless-stopped
     ports:
       # On Windows, Internet Connection Sharing (needed by Docker/WSL networking) holds 0.0.0.0:53/udp.
@@ -25,6 +33,7 @@ services:
   npm:
     image: jc21/nginx-proxy-manager@sha256:4393e642e233e5efd5adeb7f10918d4aaea71c9ed875b94190273fc8e87f9594
     container_name: npm
+    logging: *logging
     restart: unless-stopped
     ports:
       - "80:80"
@@ -40,6 +49,7 @@ services:
   backrest:
     image: garethgeorge/backrest:v1.14.1
     container_name: backrest
+    logging: *logging
     # Fixed name: restic records it as the snapshot host.
     hostname: backrest
     restart: unless-stopped
@@ -67,6 +77,7 @@ services:
   tinyauth:
     image: ghcr.io/tinyauthapp/tinyauth:v5.2.0
     container_name: tinyauth
+    logging: *logging
     restart: unless-stopped
     environment:
       TZ: ${TZ:-Etc/UTC}
