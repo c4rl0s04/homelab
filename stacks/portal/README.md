@@ -11,6 +11,20 @@ Homepage's YAML files (`settings`, `services`, `widgets`, `bookmarks`) are inlin
 
 Change the dashboard by editing `compose.yaml` and push. Then in Dockhand press **Desmontar** (removes only the container; Homepage keeps no data) and **Desplegar**: a plain sync pulls the new file but Compose does not recreate the container when only inline `configs` content changes (seen 2026-11-13 with Dockhand 1.0.57). Changes to stack variables (widget keys) apply with a normal redeploy. Inside the inline content, write `$$` for a literal `$` (Compose interpolates `${...}`).
 
+## Look and info sheet
+
+- Sections follow what you want to do: **Ver** (watch and request), **Biblioteca** (the tools that fill it), **Herramientas** and **Sistema**.
+- `custom-css` gives the page its look: glass cards over a dark background with soft colour light. It falls back to solid surfaces when the device asks for reduced transparency, and to fades when it asks for reduced motion.
+- `custom-js` adds an ⓘ to each card that opens a side panel (a bottom sheet on phones) showing:
+  - what the app does;
+  - its stack;
+  - which login it uses;
+  - its internal address;
+  - its live status.
+
+  The panel's text lives in the `INFO` map. **A new service also needs an `INFO` entry**, or it simply gets no ⓘ.
+- Both files use Homepage's class names (`.service-card`, `li.service[data-name]`, `#information-widgets`…), which are only checked against the pinned `v2.7.0`. After a version bump, open the page and check that the look and the ⓘ still work.
+
 No Docker socket: status dots come from `siteMonitor` checks against each container on the `proxy` network.
 
 ## Deploy with Dockhand
@@ -39,3 +53,9 @@ None: the configuration is in Git and the keys are in Dockhand. Homepage only wr
 - [x] Trial run outside Dockhand (2026-11-12, `v2.7.0`): page renders, all groups and status checks load; widgets without keys show "API error" as expected.
 - [x] Deployed as a Git stack (2026-11-12); `portal.home` answers; Uptime Kuma checks it with header `Host: portal.home` (Homepage rejects other host names).
 - [x] Widget keys (2026-11-13): Jellyfin (widget `version: 2` for Jellyfin 12), Jellyseerr, Radarr, Prowlarr and Bazarr show data.
+- [x] Glass redesign and info sheet tried on a throwaway copy (2026-11-16, loopback port, same image):
+  - layout checked at 1440 px, 1100 px and 375 px;
+  - ⓘ opens, and closes with Esc and the scrim, with focus going back to the ⓘ;
+  - widgets and status dots still show;
+  - no horizontal scroll.
+- [ ] Owner checks `portal.casa.home` on the phone and the PC after the deploy.
