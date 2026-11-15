@@ -45,6 +45,8 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
   | `backrest.casa.home` | `backrest:9898` | Tinyauth |
   | `adguard.casa.home` | `adguardhome:3000` | Tinyauth |
   | `dockhand.casa.home` | `dockhand:3000` | Tinyauth, then Dockhand's own (root-equivalent: two locks) |
+  | `pdf.casa.home` | `stirling-pdf:8080` | Tinyauth |
+  | `drop.casa.home` | `pairdrop:3000` | None: open to every device at home, guests included |
   | `jellyfin.casa.home` | `jellyfin:8096` | Jellyfin's own (TV and phone apps cannot use Tinyauth) |
   | `jellyseer.casa.home` | `jellyseerr:5055` | Jellyfin account |
   | `trek.casa.home` | `trek:3000` | TREK's own accounts (shared with other people) |

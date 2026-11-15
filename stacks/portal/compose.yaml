@@ -125,6 +125,16 @@ configs:
               href: http://trek.casa.home
               description: Viajes
               siteMonitor: http://trek:3000/api/health
+          - PairDrop:
+              icon: pairdrop.png
+              href: http://drop.casa.home
+              description: Pasar archivos entre dispositivos
+              siteMonitor: http://pairdrop:3000
+          - Stirling-PDF:
+              icon: stirling-pdf.png
+              href: http://pdf.casa.home
+              description: Herramientas PDF
+              siteMonitor: http://stirling-pdf:8080
       - Sistema:
           - Dockhand:
               icon: mdi-docker

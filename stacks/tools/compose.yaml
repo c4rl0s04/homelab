@@ -1,0 +1,46 @@
+name: tools
+
+# Docker keeps container logs forever by default; cap each container at 3 x 10 MB.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  # Send files between devices on the home network, like AirDrop. Transfers go device to device (WebRTC).
+  pairdrop:
+    image: ghcr.io/schlagmichdoch/pairdrop:v1.11.2
+    container_name: pairdrop
+    logging: *logging
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PAIRDROP_PORT:-3005}:3000"
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+    networks:
+      - proxy # drop.casa.home; npm sets X-Forwarded-For, which PairDrop uses to group devices of one network
+
+  # PDF toolbox: merge, split, compress, OCR, sign. Files are processed here, never sent to a website.
+  stirling-pdf:
+    image: stirlingtools/stirling-pdf:3.3.0
+    container_name: stirling-pdf
+    logging: *logging
+    restart: unless-stopped
+    mem_limit: 4g # the size its docs recommend; keeps a large OCR job from starving other stacks
+    ports:
+      - "127.0.0.1:${STIRLING_PDF_PORT:-3006}:8080"
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      SECURITY_ENABLELOGIN: "false" # behind Tinyauth like the other tools
+      SYSTEM_DEFAULTLOCALE: es-ES
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT}/stirling-pdf/configs:/configs
+      - ${DATA_ROOT:?Set DATA_ROOT}/stirling-pdf/storage:/storage
+    networks:
+      - proxy # pdf.casa.home
+
+networks:
+  proxy:
+    name: proxy
+    external: true
