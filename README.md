@@ -31,6 +31,10 @@ flowchart LR
     homepage["Homepage<br/>every app on one page"]
   end
 
+  subgraph TOOLS["tools"]
+    tools["PairDrop · Stirling-PDF<br/>file sharing and PDFs"]
+  end
+
   subgraph MEDIA["media"]
     media["Jellyfin · Radarr<br/>qBittorrent · VPN"]
   end
@@ -44,7 +48,8 @@ flowchart LR
   dockhand -- deploys --> MEDIA
   dockhand -- deploys --> MONITORING
   dockhand -- deploys --> PORTAL
-  INFRA & TREK & MEDIA & MONITORING --> data
+  dockhand -- deploys --> TOOLS
+  INFRA & TREK & MEDIA & MONITORING & TOOLS --> data
   MEDIA --> films[("films and downloads<br/>MEDIA_ROOT")]
   data -- every 24 h --> backups
 
@@ -54,6 +59,7 @@ flowchart LR
   classDef media fill:#ffe4e6,stroke:#be123c,color:#4c0519
   classDef monitoring fill:#dcfce7,stroke:#15803d,color:#052e16
   classDef portal fill:#e0f2fe,stroke:#0369a1,color:#082f49
+  classDef tools fill:#f3e8ff,stroke:#7e22ce,color:#3b0764
   classDef storage fill:#f1f5f9,stroke:#475569,color:#0f172a
   class dockhand manager
   class adguard,npm,backrest,tinyauth infra
@@ -61,6 +67,7 @@ flowchart LR
   class media media
   class kuma monitoring
   class homepage portal
+  class tools tools
   class git,data,backups,films storage
   style DOCKHAND fill:#f0fdfa,stroke:#0f766e,color:#042f2e
   style INFRA fill:#eef2ff,stroke:#4338ca,color:#1e1b4b
@@ -68,6 +75,7 @@ flowchart LR
   style MEDIA fill:#fff1f2,stroke:#be123c,color:#4c0519
   style MONITORING fill:#f0fdf4,stroke:#15803d,color:#052e16
   style PORTAL fill:#f0f9ff,stroke:#0369a1,color:#082f49
+  style TOOLS fill:#faf5ff,stroke:#7e22ce,color:#3b0764
 ```
 
 One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-data` (`DATA_ROOT`), copies in `homelab-backups` (`BACKUP_ROOT`). Network details (DNS, `*.casa.home`, the shared login, Docker networks) are in `stacks/infra/README.md`. Keep this diagram in sync with `stacks/` (see `AGENTS.md`).
@@ -82,6 +90,7 @@ stacks/
   trek/     # TREK travel planner; first Git stack (pilot)
   monitoring/ # Uptime Kuma: checks every service, separate so it survives other stacks' redeploys
   portal/   # Homepage: every app on one page; its configuration is inline in compose.yaml
+  tools/    # PairDrop (send files between devices) and Stirling-PDF (PDF toolbox)
   photos/   # planned: Immich candidate
   paas/     # planned: Coolify/Dokploy, on its own host/VM, not managed by Dockhand
 hosts/
