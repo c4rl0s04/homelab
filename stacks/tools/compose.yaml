@@ -37,6 +37,9 @@ services:
     volumes:
       - ${DATA_ROOT:?Set DATA_ROOT}/stirling-pdf/configs:/configs
       - ${DATA_ROOT:?Set DATA_ROOT}/stirling-pdf/storage:/storage
+      # OCR languages. The image ships eng, deu, fra, por, chi_sim; this folder holds those plus spa
+      # (tessdata_fast). It replaces the image's folder, so it must contain every language, not only extras.
+      - ${DATA_ROOT:?Set DATA_ROOT}/stirling-pdf/tessdata:/usr/share/tesseract-ocr/5/tessdata
     networks:
       - proxy # pdf.casa.home
 
