@@ -1,5 +1,12 @@
 name: portal
 
+# Docker keeps container logs forever by default; cap each container at 3 x 10 MB.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
 # Homepage: one page with every app, its status and live widgets.
 # Its configuration lives in this file (Compose `configs` with inline content) so it is versioned in Git
 # and needs no host path: Dockhand runs Compose from its own checkout, where `./config` would not resolve on the host.
@@ -8,6 +15,7 @@ services:
   homepage:
     image: ghcr.io/gethomepage/homepage:v2.7.0
     container_name: homepage
+    logging: *logging
     restart: unless-stopped
     ports:
       - "127.0.0.1:${PORTAL_PORT:-3004}:3000"
