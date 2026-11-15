@@ -37,6 +37,10 @@ Check services by container name on the `proxy` network, not by `*.casa.home` (t
 
 One DNS monitor resolves `jellyfin.casa.home` against the host IP (`192.168.1.10`) to cover AdGuard itself. It goes through the Windows host network, so it fails while ProtonVPN is connected on the host (which blocks DNS to other servers); LAN devices are not affected. Expect it to recover on the mini PC.
 
+## Status page
+
+Status page `homelab` (slug) lists every monitor; the portal's Uptime Kuma widget reads it (`/status/homelab`). Add new monitors to it, or the widget will not count them.
+
 ## Data and backup
 
 `${DATA_ROOT}/uptime-kuma` (SQLite: monitors, history, account). Backed up with the rest of `DATA_ROOT`.

@@ -40,6 +40,8 @@ Git stack `portal`: repository `homelab`, branch `main`, compose file `stacks/po
 | `PROWLARR_API_KEY` | Secret. Prowlarr → Settings → General → API Key |
 | `BAZARR_API_KEY` | Secret. Bazarr → Settings → General → API Key |
 
+Three more widgets need no key: qBittorrent (it trusts the `proxy` network through its subnet whitelist), AdGuard (no users) and Uptime Kuma (reads the public status page `homelab`).
+
 The keys are optional: without one, that widget shows an error and its link and status still work. Optional: `PORTAL_PORT` (3004).
 
 npm proxy host: `portal.casa.home` → `homepage:3000`, behind Tinyauth. `HOMEPAGE_ALLOWED_HOSTS` must list every name used to open it.
@@ -58,4 +60,5 @@ None: the configuration is in Git and the keys are in Dockhand. Homepage only wr
   - ⓘ opens, and closes with Esc and the scrim, with focus going back to the ⓘ;
   - widgets and status dots still show;
   - no horizontal scroll.
+- [x] Widgets without keys (2026-11-16): qBittorrent (speeds, torrents), AdGuard (queries, blocked, latency) and Uptime Kuma (up/down, uptime) show data on a throwaway copy.
 - [ ] Owner checks `portal.casa.home` on the phone and the PC after the deploy.
