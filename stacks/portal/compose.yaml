@@ -136,6 +136,10 @@ configs:
               href: http://qbit.casa.home
               description: Descargas por VPN
               siteMonitor: http://gluetun:8080
+              widget:
+                type: qbittorrent
+                url: http://gluetun:8080 # no login: qBittorrent trusts the proxy network (subnet whitelist)
+                fields: ["download", "upload", "leech", "seed"]
       - Herramientas:
           - TREK:
               icon: mdi-map-marker-path
@@ -163,11 +167,18 @@ configs:
               href: http://status.casa.home
               description: Estado y avisos
               siteMonitor: http://uptime-kuma:3001
+              widget:
+                type: uptimekuma
+                url: http://uptime-kuma:3001
+                slug: homelab # Kuma status page with every monitor
           - AdGuard:
               icon: adguard-home.png
               href: http://adguard.casa.home
               description: DNS y anuncios
               siteMonitor: http://adguardhome:3000
+              widget:
+                type: adguard
+                url: http://adguardhome:3000 # no login: AdGuard has no users
           - Nginx Proxy Manager:
               icon: nginx-proxy-manager.png
               href: http://npm.casa.home
