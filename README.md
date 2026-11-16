@@ -105,7 +105,6 @@ E:\homelab\            (/srv/homelab on Linux)
   repo\     # this repository
   data\     # DATA_ROOT: app data, Dockhand's encrypted secrets
   media\    # MEDIA_ROOT: downloads/ and media/ (films)
-  snapshot-worktree\  # scratch checkout used by scripts/snapshot-config.sh
 C:\homelab-backups\    # BACKUP_ROOT: deliberately on another disk
 ```
 
@@ -155,13 +154,9 @@ Planned, not deployed. Choose the appropriate stack when implementation starts.
 | Zigbee2MQTT | Only if Zigbee devices are bought | Home Assistant and a USB Zigbee adapter |
 | Offsite backup copy | Pending | Destination choice |
 
-## Configuration snapshots
+## Configuration and recovery
 
-Some settings live in app databases, not in Git: npm proxy hosts (and their Tinyauth block), AdGuard rewrites and upstreams, Uptime Kuma monitors, each app's login mode and Dockhand's stack variables. `snapshots/*.json` records them so they can be redone by hand after a rebuild.
-
-- `scripts/snapshot_config.py <DATA_ROOT>` reads the app files read-only and writes the JSON. Secret values are replaced by `<secret>` (Dockhand secrets and any variable named `*KEY*`, `*TOKEN*`, `*PASSWORD*`, `*SECRET*`); the script refuses to write output that still looks like a key or hash.
-- `scripts/snapshot-config.sh hosts/<host>.env` runs it in a separate worktree (`../snapshot-worktree`) and opens a PR "Configuration snapshot <date>" only when something changed. Run it daily and at logon (Windows: Task Scheduler; Linux: a systemd timer or cron).
-- Snapshots are a redacted record, not a backup or a source of truth. They can help re-enter settings manually; restoring application data from backup is a separate workflow. Snapshot contents may lag behind the running system.
+Application settings, databases and Dockhand's encrypted variables live under `DATA_ROOT` and are covered by the documented Backrest plan. Git contains Compose definitions and examples, not a copy of the live configuration. Restore verification and offsite-copy limitations are described in `stacks/infra/README.md` and `stacks/dockhand/README.md`.
 
 ## Moving to a new host
 
