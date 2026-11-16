@@ -127,8 +127,6 @@ A small pipeline where each app does one job:
 4. When the download finishes, Radarr renames the film and files it into the library. **Bazarr** adds subtitles.
 5. **Jellyfin** streams it to the TV, phones and browsers.
 
-![Jellyfin home screen](docs/screens/jellyfin.jpg)
-
 ### `monitoring`: is it up, and what is it using
 
 - **Uptime Kuma** checks all 17 services every minute by container name. It also publishes a status page.
