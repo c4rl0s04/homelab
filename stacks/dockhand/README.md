@@ -23,8 +23,13 @@ Open `http://dockhand.casa.home` (Tinyauth, then Dockhand's own login) (or `http
 | Stack | How |
 | --- | --- |
 | `infra` | Git stack from `stacks/infra/compose.yaml` |
+| `media` | Git stack from `stacks/media/compose.yaml` |
 | `trek` | Git stack from `stacks/trek/compose.yaml` |
-| `streaming` (old media) | Observed only, untracked |
+| `monitoring` | Git stack from `stacks/monitoring/compose.yaml` |
+| `portal` | Git stack from `stacks/portal/compose.yaml` |
+| `tools` | Git stack from `stacks/tools/compose.yaml` |
+
+The old `streaming` stack was replaced by `media` on 2026-11-12. Do not start both: their container names and ports overlap.
 
 Git access uses a fine-grained GitHub token with read-only *Contents* access to this repository (Settings → Git → Credentials). Changes reach a stack only after they are pushed to `main` and the stack is deployed again.
 

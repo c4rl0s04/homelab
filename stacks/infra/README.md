@@ -7,9 +7,9 @@ Shared infrastructure used by every stack. **Managed by Dockhand as a Git stack*
 | AdGuard Home | Home DNS: ad blocking and `*.casa.home` names (DNS rewrites) for every device | `127.0.0.1:${ADGUARD_UI_PORT:-3000}` | Running |
 | Nginx Proxy Manager | Reverse proxy on 80/443: forwards `*.casa.home` to each stack's web service | `:${NPM_ADMIN_PORT:-81}` | Running |
 | Tinyauth | One shared login for the web UIs (npm asks it before serving a protected name) | `auth.casa.home` | Running |
-| Backrest | Encrypted, deduplicated backups (restic) of `DATA_ROOT` and the old media folder | `127.0.0.1:${BACKREST_PORT:-9898}` | Running |
+| Backrest | Encrypted, deduplicated backups (restic) of `DATA_ROOT`; bulk media is separate | `127.0.0.1:${BACKREST_PORT:-9898}` | Running |
 
-Planned later: Tailscale; portal and other apps get their own stacks (see the roadmap in the root README).
+Tailscale is planned; portal and the other applications are separate stacks (see the root README).
 
 ## Deploy with Dockhand
 
@@ -92,7 +92,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
 
 ## Cutover from the old media stack (AdGuard + npm), done 2026-11-12
 
-Kept as a record and rollback reference; it predates management by Dockhand.
+Historical record from 2026-11-12: it predates the `media` migration and current names. Do not execute these commands as a current recovery procedure; verify current stack ownership, paths and backups first. The old and new media stacks must not run together.
 
 Images are the same digests as before, so configuration loads unchanged. Old configuration is copied, not moved: it stays as rollback.
 
@@ -114,7 +114,7 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 5. Start the rest of the old media stack with `docker compose start` in `<old-project>`. **Never `docker compose up` there** until media migrates: it would recreate `adguardhome` and `npm` and clash on names and ports.
 6. Check `jellyfin.home` and the others through npm.
 
-**Rollback:** `docker compose --env-file ../../hosts/windows-pc.env rm -sf adguardhome npm` here, then `docker compose up -d adguardhome npm` in `<old-project>` (its original config was never changed).
+**Historical rollback:** the original procedure referred to `<old-project>` and predates the `media` cutover. It is not a validated current recovery procedure.
 
 ## Backups (Backrest)
 

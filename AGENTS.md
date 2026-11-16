@@ -4,7 +4,7 @@ Read `README.md` first: it defines the stack layout, layers and portability rule
 
 ## Current state
 
-- `stacks/dockhand` (the manager, started by hand) deploys every other stack as a Git stack: `infra` (AdGuard, Nginx Proxy Manager, Backrest), `media`, `trek`, `monitoring` (Uptime Kuma), `portal` (Homepage) and `tools` (PairDrop, Stirling-PDF). See each stack's checklist before relying on Dockhand behaviour.
+- `stacks/dockhand` (the manager, started by hand) deploys every other stack as a Git stack: `infra` (AdGuard, Nginx Proxy Manager, Tinyauth, Backrest), `media`, `trek`, `monitoring` (Uptime Kuma, Beszel), `portal` (Homepage) and `tools` (PairDrop, Stirling-PDF, Neko). See each stack's checklist before relying on Dockhand behaviour.
 - Applying changes: push, then sync the stack in Dockhand. New or changed stack variables only reach containers on deploy. `portal` needs Desmontar + Desplegar for config changes (see its README).
 - Names are `<app>.casa.home`; most web UIs sit behind Tinyauth (one login) with their own login off and their port on `127.0.0.1`. See the name table in `stacks/infra/README.md` before adding or exposing a web UI.
 - Planned work and its prerequisites: the roadmap in `README.md`.

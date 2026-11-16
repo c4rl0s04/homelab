@@ -6,7 +6,7 @@
 
 1. **Stacks → Git stack**, repository `c4rl0s04/homelab`, branch `main`, compose file `stacks/trek/compose.yaml`. The repository is private: give Dockhand a fine-grained GitHub token with read-only *Contents* access to this repository only.
 2. Add the stack variables from `.env.example`. `TREK_ENCRYPTION_KEY` is a secret: generate it once and keep it only in Dockhand.
-3. **Create** only registers the stack ("no desplegado"). Press **Deploy** on its row and confirm the Git sync, then open `http://127.0.0.1:3002` and create the first account (it becomes the admin).
+3. **Create** only registers the stack ("no desplegado"). Press **Deploy** on its row and confirm the Git sync, then open `http://127.0.0.1:3002` and follow the first-login instructions below.
 
 ## Access
 
