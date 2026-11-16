@@ -14,7 +14,8 @@ Read `README.md` first: it defines the stack layout, layers and portability rule
 
 ## Documentation
 
-- The Mermaid diagram in `README.md` is the architecture map. Update it in the same change that adds, removes or moves a stack, a service, a published port, a Docker network or a data path. Keep it to what is actually deployed; planned stacks stay in the layout list only.
+- `docs/architecture.html` is the architecture map (self-contained, logos inlined); `docs/architecture.png` and `docs/architecture-dark.png` are its screenshots used by `README.md`. Update it in the same change that adds, removes or moves a stack or a service, then re-render both PNGs (headless Chromium/Edge, window 1640x1250, scale 2; dark = `data-theme="dark"` on `<html>`). Keep it to what is actually deployed; planned items stay in the README roadmap.
+- `README.md` is the public showcase; operator detail belongs in each stack's README. Retake the portal and status screenshots in `docs/` when the portal changes visibly.
 
 ## Safety
 
