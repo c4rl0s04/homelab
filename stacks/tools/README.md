@@ -16,7 +16,7 @@ Git stack `tools`: repository `homelab`, branch `main`, compose file `stacks/too
 | --- | --- |
 | `DATA_ROOT` | `E:/homelab/data` |
 | `TZ` | `Europe/Madrid` |
-| `HOST_IP` | `192.168.1.10` (this machine's LAN address, reserved in the router) |
+| `HOST_IP` | This machine's LAN address, reserved in the router (e.g. `192.168.1.10`) |
 
 Optional: `PAIRDROP_PORT` (3005), `STIRLING_PDF_PORT` (3006), `NEKO_PORT` (3008), all on `127.0.0.1` only.
 

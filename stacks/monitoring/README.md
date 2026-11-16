@@ -41,7 +41,7 @@ Check services by container name on the `proxy` network, not by `*.casa.home` (t
 | Neko | `http://neko:8080` |
 | Beszel | `http://beszel:8090/api/health` |
 
-One DNS monitor resolves `jellyfin.casa.home` against the host IP (`192.168.1.10`) to cover AdGuard itself. It goes through the Windows host network, so it fails while ProtonVPN is connected on the host (which blocks DNS to other servers); LAN devices are not affected. Expect it to recover on the mini PC.
+One DNS monitor resolves `jellyfin.casa.home` against the host's LAN IP to cover AdGuard itself. It goes through the Windows host network, so it fails while ProtonVPN is connected on the host (which blocks DNS to other servers); LAN devices are not affected. Expect it to recover on the mini PC.
 
 ## Beszel
 
@@ -55,7 +55,7 @@ The agent and the proxy sit on an internal network with no internet access. On D
 
 **First start**
 
-1. Deploy, then open `beszel.casa.home` and create the account with email `user@casa.home`. That is the address Tinyauth sends for the user `user`: the username, lowercased, at the cookie domain.
+1. Deploy, then open `beszel.casa.home` and create the account with email `<user>@casa.home`, where `<user>` is your Tinyauth username in lowercase: that is the address Tinyauth sends (username at the cookie domain).
 2. In Beszel, click **Add system**: name `windows-pc`, host `beszel-agent`. Copy the **Key** and **Token** into Dockhand as secrets `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN`, then redeploy `monitoring`. Until then the agent exits and retries.
 
 **One login**

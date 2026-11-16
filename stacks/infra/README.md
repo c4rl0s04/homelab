@@ -20,7 +20,7 @@ Git stack `infra`: repository `homelab`, branch `main`, compose file `stacks/inf
 | `DATA_ROOT` | `E:/homelab/data` |
 | `BACKUP_ROOT` | `C:/homelab-backups` |
 | `TZ` | `Europe/Madrid` |
-| `DNS_BIND_IP` | `192.168.1.10` (the host's LAN IP, reserved in the router) |
+| `DNS_BIND_IP` | The host's LAN IP, reserved in the router (e.g. `192.168.1.10`) |
 
 Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898).
 
@@ -30,7 +30,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
 
 - **DNS** works at network level: the router hands out this host as DNS server, and AdGuard rewrites `<app>.casa.home` to the host IP. Keep a fallback resolver in the router (e.g. `1.1.1.1`) so the home network survives if this host is down.
 - **Upstream DNS uses an IP literal** (`https://9.9.9.10/dns-query`, Quad9 unfiltered). On the Windows PC, ProtonVPN blocks plain DNS to anything but its own resolver, so AdGuard could not bootstrap `dns10.quad9.net` by name. The Windows host itself also cannot query AdGuard while ProtonVPN is connected; other devices can. Revisit on the mini PC (no desktop VPN there).
-- **Router DHCP** (`192.168.1.1`) currently hands out `192.168.1.10, 1.1.1.1`. Devices may pick `1.1.1.1`, which does not know these names (confirmed 2026-11-12: a phone works with DNS set manually to `192.168.1.10`). Kept on purpose while AdGuard runs on a PC that is not always on; remove `1.1.1.1` once the mini PC hosts DNS. The host's IP `192.168.1.10` is reserved in the router (2026-11-13), so the DNS address and `DNS_BIND_IP` stay valid.
+- **Router DHCP** hands out the host IP first and `1.1.1.1` as a fallback. Devices may pick `1.1.1.1`, which does not know these names (confirmed 2026-11-12: a phone works with DNS set manually to the host IP). Kept on purpose while AdGuard runs on a PC that is not always on; remove the fallback once the mini PC hosts DNS. The host's IP is reserved in the router (2026-11-13), so the DNS address and `DNS_BIND_IP` stay valid.
 - **Port 53 on Windows:** the "Internet Connection Sharing" service (`SharedAccess`) holds UDP `0.0.0.0:53` after every reboot; Docker/WSL networking relies on it, so do not disable it. AdGuard binds the LAN address instead (`DNS_BIND_IP`, e.g. `192.168.1.10:53`), which takes precedence over the wildcard (verified 2026-11-13). The address must stay fixed: reserve it in the router. On the mini PC (Linux) leave `DNS_BIND_IP` unset.
 - **Names:** the AdGuard rewrite `*.home → <host IP>` covers every `<app>.casa.home`; npm maps each name to a container. Names use two labels before `home` because the shared login cookie needs a parent domain (`casa.home`); with plain `*.home` Tinyauth limits the cookie to `auth.home` (tested 2026-11-13). The old `*.home` proxy hosts were removed.
 
@@ -90,43 +90,17 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
   Then add a proxy host in npm (`app.casa.home` → `http://<container_name>:<port>`), with the Tinyauth block above unless the app keeps its own login.
 - The media stack joins `proxy` entirely, so npm reaches `jellyfin`, `radarr`, `jellyseerr` and `gluetun` (qBittorrent) by container name.
 
-## Cutover from the old media stack (AdGuard + npm), done 2026-11-12
-
-Historical record from 2026-11-12: it predates the `media` migration and current names. Do not execute these commands as a current recovery procedure; verify current stack ownership, paths and backups first. The old and new media stacks must not run together.
-
-Images are the same digests as before, so configuration loads unchanged. Old configuration is copied, not moved: it stays as rollback.
-
-1. Stop the old stack (already stopped on 2026-11-12) and remove only its two containers. Bind-mounted config is untouched:
-
-   ```bash
-   docker rm adguardhome npm
-   ```
-
-2. Copy configuration into `DATA_ROOT`:
-
-   ```bash
-   robocopy <old-project>\configs\adguardhome <data-root>\adguardhome /E
-   robocopy <old-project>\configs\npm <data-root>\npm /E
-   ```
-
-3. Start infra from `stacks/infra`: `docker compose --env-file ../../hosts/windows-pc.env up -d`.
-4. Verify: `nslookup jellyfin.home 127.0.0.1` answers `192.168.1.10`; AdGuard UI on `:3000` and npm on `:81` keep their accounts, rules and proxy hosts.
-5. Start the rest of the old media stack with `docker compose start` in `<old-project>`. **Never `docker compose up` there** until media migrates: it would recreate `adguardhome` and `npm` and clash on names and ports.
-6. Check `jellyfin.home` and the others through npm.
-
-**Historical rollback:** the original procedure referred to `<old-project>` and predates the `media` cutover. It is not a validated current recovery procedure.
-
 ## Backups (Backrest)
 
 | Setting | Value |
 | --- | --- |
-| Repository | `homelab-local` → `/repos/homelab` = `${BACKUP_ROOT}/homelab` (`C:\homelab-backups\homelab`, SSD, different disk from `E:`) |
-| Plan | `homelab-daily`: `/userdata/homelab-data` (the old `<old-project>` folder was dropped on 2026-11-12; earlier snapshots still hold it) |
+| Repository | `homelab-local` → `/repos/homelab` = `${BACKUP_ROOT}/homelab` (an SSD, a different disk from `DATA_ROOT`) |
+| Plan | `homelab-daily`: `/userdata/homelab-data` |
 | Excludes | `homelab-data/backrest/cache`, `__pycache__` |
 | Schedule | Every 24 h counted from the last run, so a backup runs soon after the PC is switched on |
 | Retention | 24 hourly, 30 daily, 12 monthly |
 
-- **The repository password lives outside this PC** (owner's password manager). Backrest's own config sits in `DATA_ROOT` on `E:`; if that disk dies, the copies on `C:` are unreadable without the password.
+- **The repository password lives outside this PC** (owner's password manager). Backrest's own config sits in `DATA_ROOT`; if that disk dies, the copies on the backup disk are unreadable without the password.
 - Sources are mounted read-only. Restore to a writable path such as `/tmp/<name>` inside the container (then copy out), never over `/userdata`.
 - Databases are copied live (no container stop). SQLite files restored fine in the test below; stop a stack before a backup used for migration.
 - Only one copy, on the same PC. An offsite copy (cloud or external disk) is still pending.
@@ -143,6 +117,6 @@ Images are the same digests as before, so configuration loads unchanged. Old con
 - [x] Backup restore test of `DATA_ROOT` (files byte-identical, see Backups).
 - [x] AdGuard + npm cutover completed 2026-11-12: DNS rewrites answer, `google.com` resolves upstream, all four npm proxy hosts reach the old media stack.
 - [x] Registered and deployed as a Dockhand Git stack (2026-11-12). The hand-started project had to be removed first (`docker compose down`): Dockhand refuses a Git stack whose name matches an existing untracked one. Verified afterwards: AdGuard answers `jellyfin.home` and `google.com`, all four npm proxy hosts respond, Backrest keeps its plan and read-only mounts.
-- [x] `*.home` names (2026-11-12): AdGuard wildcard rewrite added (any `<name>.home` answers the host IP); npm proxy hosts for all nine names in the table above respond through `192.168.1.10:80`.
+- [x] `*.home` names (2026-11-12): AdGuard wildcard rewrite added (any `<name>.home` answers the host IP); npm proxy hosts for all nine names in the table above respond through the host IP on port 80.
 - [x] Shared login and `*.casa.home` (2026-11-13): Tinyauth deployed from Git; all 14 names moved; protected names redirect to `auth.casa.home`; one login opened the portal and the apps from a phone on the Wi-Fi. Own logins turned off in Radarr and Prowlarr (`AuthenticationMethod` `External` in `config.xml`, 2026-11-15: `DisabledForLocalAddresses` still asked for a login because npm forwards the client address), Bazarr (auth type null), qBittorrent (subnet whitelist `172.21.0.0/16`), AdGuard (no users) and Backrest (`auth.disabled`); each config was backed up as `*.bak-20261113-*` first. Uptime Kuma's own login was turned off by the owner in its settings (`disableAuth = true`).
-- [x] DNS after a reboot (2026-11-13): AdGuard bound to `DNS_BIND_IP=192.168.1.10`; LAN devices resolve again with ICS still running.
+- [x] DNS after a reboot (2026-11-13): AdGuard bound to the host IP (`DNS_BIND_IP`); LAN devices resolve again with ICS still running.

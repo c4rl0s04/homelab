@@ -35,7 +35,7 @@ services:
       - "127.0.0.1:${BESZEL_PORT:-3007}:8090"
     environment:
       APP_URL: http://beszel.casa.home
-      # One login: npm passes Tinyauth's user as Remote-Email (user@casa.home); Beszel trusts it
+      # One login: npm passes Tinyauth's user as Remote-Email (<user>@casa.home); Beszel trusts it
       # only from the proxy network, so a direct visit to the loopback port still asks for a password.
       TRUSTED_AUTH_HEADER: Remote-Email
       TRUSTED_PROXY_IPS: ${PROXY_SUBNET:-172.21.0.0/16}
