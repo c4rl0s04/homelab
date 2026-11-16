@@ -23,7 +23,7 @@ services:
     environment:
       TZ: ${TZ:-Etc/UTC}
     networks:
-      - proxy # status.home, and checks other services by container name
+      - proxy # status.casa.home, and checks other services by container name
 
   # Resource history: CPU, memory, network, disk and GPU for the host and every container.
   beszel:

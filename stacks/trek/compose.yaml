@@ -20,7 +20,7 @@ services:
       - SETGID
       - KILL # lets dumb-init forward SIGTERM for a graceful shutdown
     ports:
-      # Loopback only; other devices use trek.home through Nginx Proxy Manager.
+      # Loopback only; other devices use trek.casa.home through Nginx Proxy Manager.
       - "127.0.0.1:${TREK_PORT:-3002}:3000"
     networks:
       - default
@@ -50,7 +50,7 @@ services:
         max-file: "3"
 
 networks:
-  # Shared network from infra: Nginx Proxy Manager serves trek.home through it.
+  # Shared network from infra: Nginx Proxy Manager serves trek.casa.home through it.
   proxy:
     name: proxy
     external: true

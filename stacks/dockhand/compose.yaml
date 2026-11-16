@@ -26,7 +26,7 @@ services:
       TZ: ${TZ:-Etc/UTC}
     networks:
       - default
-      - proxy # dockhand.home through Nginx Proxy Manager
+      - proxy # dockhand.casa.home through Nginx Proxy Manager
 
 networks:
   # Shared network, created once per host: `docker network create proxy`.

@@ -9,7 +9,7 @@ Shared infrastructure used by every stack. **Managed by Dockhand as a Git stack*
 | Tinyauth | One shared login for the web UIs (npm asks it before serving a protected name) | `auth.casa.home` | Running |
 | Backrest | Encrypted, deduplicated backups (restic) of `DATA_ROOT`; bulk media is separate | `127.0.0.1:${BACKREST_PORT:-9898}` | Running |
 
-Tailscale is planned; portal and the other applications are separate stacks (see the root README).
+Tailscale is planned; portal and the other applications are separate stacks (see the root README). The other stacks need this one running: without AdGuard and npm no `*.casa.home` name answers, and without Tinyauth every protected name stops answering.
 
 ## Deploy with Dockhand
 

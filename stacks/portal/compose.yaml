@@ -37,7 +37,7 @@ services:
       - { source: custom-css, target: /app/config/custom.css }
       - { source: custom-js, target: /app/config/custom.js }
     networks:
-      - proxy # portal.home, and status checks by container name
+      - proxy # portal.casa.home, and status checks by container name
 
 networks:
   proxy:
