@@ -75,3 +75,5 @@ Status page `homelab` (slug) lists every monitor; the portal's Uptime Kuma widge
 - [x] Deployed as a Git stack (2026-11-12); `status.home` answers through npm. Database: SQLite (chosen at first start).
 - [x] Monitors for every service above, plus Prowlarr, Bazarr and the DNS check, are green (12/12, 2026-11-12). Two retries before a service counts as down.
 - [x] Change → push → sync test (2026-11-12): `stop_grace_period: 30s` merged in PR #9, synced in Dockhand; the container was recreated with `StopTimeout=30` and all 12 monitors and their history survived.
+- [x] Beszel (2026-11-16): hub, agent and socket proxy deployed; the agent connects over WebSocket and reports CPU, memory, disk and the RTX 2070 GPU. `beszel.casa.home` redirects to Tinyauth; a forged `Remote-Email` from outside npm is ignored; port 3007 is not reachable from the LAN. Monitors for Neko and Beszel added and on the `homelab` status page (17 monitors).
+- [ ] Owner opens `beszel.casa.home` through Tinyauth and lands logged in, with no Beszel password.

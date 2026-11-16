@@ -58,7 +58,7 @@ services:
       - "${HOST_IP:?Set HOST_IP}:52000-52100:52000-52100/udp"
     environment:
       TZ: ${TZ:-Etc/UTC}
-      NEKO_DESKTOP_SCREEN: 1920x1080@30
+      NEKO_DESKTOP_SCREEN: 1280x720@30 # the size Firefox opens at, so it fills the screen; less CPU than 1080p
       # No own login: everyone who passes Tinyauth is admin, which is only the owner today.
       NEKO_MEMBER_PROVIDER: noauth
       NEKO_SESSION_COOKIE_SECURE: "false" # plain HTTP on the LAN
