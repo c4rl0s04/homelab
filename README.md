@@ -1,4 +1,13 @@
-# homelab
+<h1 align="center">homelab</h1>
+
+<p align="center">
+  <img alt="7 stacks" src="https://img.shields.io/badge/Docker_Compose-7_stacks-2496ED?logo=docker&logoColor=white">
+  <img alt="23 containers" src="https://img.shields.io/badge/containers-23-0db7ed">
+  <img alt="Deployed by Dockhand" src="https://img.shields.io/badge/deployed_by-Dockhand-0f766e">
+  <img alt="17 monitors" src="https://img.shields.io/badge/Uptime_Kuma-17_monitors-5cdd8b">
+  <img alt="Nightly backups" src="https://img.shields.io/badge/backups-nightly,_encrypted-6366f1">
+  <img alt="Host" src="https://img.shields.io/badge/host-Windows_today,_Linux_next-64748b">
+</p>
 
 A personal homelab built as **independent Docker Compose stacks, versioned in Git and deployed by [Dockhand](https://github.com/Finsys/dockhand)**. Every app is reached by a friendly name (`jellyfin.casa.home`) from any device at home, behind one shared login. The whole setup is designed to move from today's Windows PC to an always-on mini PC by copying one folder.
 
@@ -19,15 +28,63 @@ A personal homelab built as **independent Docker Compose stacks, versioned in Gi
   - Backrest makes encrypted, deduplicated backups of all app data every night to a second disk.
 - **Portable by design.** Compose files hold no host paths: every path comes from a variable (`DATA_ROOT`, `MEDIA_ROOT`, `BACKUP_ROOT`).
 
+## Built with
+
+<table>
+  <tr>
+    <td align="center" width="110"><img src="docs/logos/docker.svg" height="40" alt=""><br><b>Docker</b><br><sub>runtime</sub></td>
+    <td align="center" width="110"><img src="docs/logos/dockhand.png" height="40" alt=""><br><b>Dockhand</b><br><sub>git deploys</sub></td>
+    <td align="center" width="110"><img src="docs/logos/github.svg" height="40" alt=""><br><b>GitHub</b><br><sub>stack recipes</sub></td>
+    <td align="center" width="110"><img src="docs/logos/adguard.svg" height="40" alt=""><br><b>AdGuard Home</b><br><sub>dns · ad block</sub></td>
+    <td align="center" width="110"><img src="docs/logos/npm.svg" height="40" alt=""><br><b>Nginx Proxy Manager</b><br><sub>names → apps</sub></td>
+    <td align="center" width="110"><img src="docs/logos/tinyauth.svg" height="40" alt=""><br><b>Tinyauth</b><br><sub>one login</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/logos/jellyfin.svg" height="40" alt=""><br><b>Jellyfin</b><br><sub>media server</sub></td>
+    <td align="center"><img src="docs/logos/jellyseerr.svg" height="40" alt=""><br><b>Jellyseerr</b><br><sub>requests</sub></td>
+    <td align="center"><img src="docs/logos/radarr.svg" height="40" alt=""><br><b>Radarr</b><br><sub>movie library</sub></td>
+    <td align="center"><img src="docs/logos/prowlarr.svg" height="40" alt=""><br><b>Prowlarr</b><br><sub>indexers</sub></td>
+    <td align="center"><img src="docs/logos/bazarr.svg" height="40" alt=""><br><b>Bazarr</b><br><sub>subtitles</sub></td>
+    <td align="center"><img src="docs/logos/byparr.svg" height="40" alt=""><br><b>Byparr</b><br><sub>challenge solver</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/logos/qbittorrent.svg" height="40" alt=""><br><b>qBittorrent</b><br><sub>downloads</sub></td>
+    <td align="center"><img src="docs/logos/gluetun.svg" height="40" alt=""><br><b>Gluetun</b><br><sub>vpn gateway</sub></td>
+    <td align="center"><img src="docs/logos/protonvpn.svg" height="40" alt=""><br><b>ProtonVPN</b><br><sub>wireguard exit</sub></td>
+    <td align="center"><img src="docs/logos/kuma.svg" height="40" alt=""><br><b>Uptime Kuma</b><br><sub>availability</sub></td>
+    <td align="center"><img src="docs/logos/beszel.svg" height="40" alt=""><br><b>Beszel</b><br><sub>resources · gpu</sub></td>
+    <td align="center"><img src="docs/logos/backrest.png" height="40" alt=""><br><b>Backrest</b><br><sub>restic backups</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/logos/homepage.png" height="40" alt=""><br><b>Homepage</b><br><sub>portal</sub></td>
+    <td align="center"><img src="docs/logos/trek.svg" height="40" alt=""><br><b>TREK</b><br><sub>travel planner</sub></td>
+    <td align="center"><img src="docs/logos/pairdrop.png" height="40" alt=""><br><b>PairDrop</b><br><sub>file sharing</sub></td>
+    <td align="center"><img src="docs/logos/stirling.svg" height="40" alt=""><br><b>Stirling-PDF</b><br><sub>pdf toolbox</sub></td>
+    <td align="center"><img src="docs/logos/neko.svg" height="40" alt=""><br><b>Neko</b><br><sub>shared browser</sub></td>
+    <td align="center"></td>
+  </tr>
+</table>
+
 ## Screenshots
 
-The portal (Homepage with a custom glass theme): every app, its status and live numbers. The ⓘ on each card opens a panel explaining the app, its stack and its login.
+**The portal**: Homepage with a custom glass theme. It shows every app grouped by what you want to do, a live status dot on each card and the apps' own numbers.
 
 ![Portal](docs/portal.png)
 
-The public status page from Uptime Kuma:
+**The ⓘ on every card** opens a panel explaining the app: what it does, which stack it lives in, which login it uses, and its internal and public addresses. On a phone the panel slides up from the bottom.
 
-![Status page](docs/status.png)
+![Portal with the info panel for qBittorrent open on the right](docs/portal-info.png)
+
+<p align="center">
+  <img src="docs/portal-phone.png" width="260" alt="Portal on a phone">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/portal-phone-info.png" width="260" alt="Portal on a phone with the info panel for Jellyfin open">
+  <br><sub>On a phone: one column, and the panel becomes a bottom sheet.</sub>
+</p>
+
+**The public status page** from Uptime Kuma, which checks every service each minute:
+
+![Uptime Kuma status page: all systems operational](docs/status.png)
 
 ## What happens when you open an app
 
