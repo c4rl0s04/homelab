@@ -65,27 +65,6 @@ A personal homelab built as **independent Docker Compose stacks, versioned in Gi
   </tr>
 </table>
 
-## Screenshots
-
-**The portal**: Homepage with a custom glass theme. It shows every app grouped by what you want to do, a live status dot on each card and the apps' own numbers.
-
-![Portal](docs/portal.png)
-
-**The ⓘ on every card** opens a panel explaining the app: what it does, which stack it lives in, which login it uses, and its internal and public addresses. On a phone the panel slides up from the bottom.
-
-![Portal with the info panel for qBittorrent open on the right](docs/portal-info.png)
-
-<p align="center">
-  <img src="docs/portal-phone.png" width="260" alt="Portal on a phone">
-  &nbsp;&nbsp;&nbsp;
-  <img src="docs/portal-phone-info.png" width="260" alt="Portal on a phone with the info panel for Jellyfin open">
-  <br><sub>On a phone: one column, and the panel becomes a bottom sheet.</sub>
-</p>
-
-**The public status page** from Uptime Kuma, which checks every service each minute:
-
-![Uptime Kuma status page: all systems operational](docs/status.png)
-
 ## What happens when you open an app
 
 1. A phone asks the home DNS (**AdGuard**) for `radarr.casa.home`. A wildcard rule answers with the server's LAN address.
@@ -95,19 +74,96 @@ A personal homelab built as **independent Docker Compose stacks, versioned in Gi
 
 Jellyfin, Jellyseerr and TREK keep their own accounts, because TV apps and other people use them. PairDrop is open to every device at home.
 
-## Stacks
 
-| Stack | Services | What it is for |
-| --- | --- | --- |
-| [`dockhand`](stacks/dockhand) | Dockhand | The control panel: deploys every other stack from Git. The only stack started by hand. |
-| [`infra`](stacks/infra) | AdGuard Home, Nginx Proxy Manager, Tinyauth, Backrest | Shared by everything: DNS, names, the login and backups. |
-| [`media`](stacks/media) | Jellyfin, Jellyseerr, Radarr, Prowlarr, Bazarr, Byparr, qBittorrent, Gluetun, qbit-gluetun-sync | Films: request, find, download through the VPN, add subtitles, watch on any screen. |
-| [`monitoring`](stacks/monitoring) | Uptime Kuma, Beszel (hub, agent, socket proxy) | Is it up, and what is using the machine. Kept separate so it survives other stacks' redeploys. |
-| [`portal`](stacks/portal) | Homepage | One page with every app. Configured entirely inline in `compose.yaml`, custom CSS and JS included. |
-| [`tools`](stacks/tools) | PairDrop, Stirling-PDF, Neko | Send files between devices, work on PDFs locally, and a shared browser streamed over WebRTC. |
-| [`trek`](stacks/trek) | TREK | Travel planning: days, places, bookings, budget and packing. It also exposes an MCP endpoint. |
+## A tour of the stacks
 
-Each folder has a README with its variables, the data it owns, how it is backed up and a dated checklist of what has been verified.
+Each stack is one folder under [`stacks/`](stacks) with its own README: variables, the data it owns, how it is backed up and a dated checklist of what has been verified.
+
+### `dockhand`: the control panel
+
+[Dockhand](https://github.com/Finsys/dockhand) is the only stack started by hand. Every other stack is registered in it as a **Git stack**: Dockhand clones this repository, reads `stacks/<name>/compose.yaml` and deploys it with that stack's variables. Variables marked secret are stored encrypted. Changing the homelab means editing a Compose file, pushing it and pressing *sync*.
+
+![Dockhand: the seven stacks, all running and deployed from Git](docs/screens/dockhand.png)
+
+### `infra`: names, login and backups
+
+Shared by every other stack, which joins its Docker network `proxy`.
+
+- **AdGuard Home** is the home DNS. It blocks ads for every device, and a wildcard rule answers every `*.casa.home` name with the server's address.
+- **Nginx Proxy Manager** sends each name to its container: `beszel.casa.home → beszel:8090`, and so on.
+- **Tinyauth** is the one login in front of the admin UIs. Nginx asks it before serving a protected name, and one session works for all of them.
+- **Backrest** runs [restic](https://restic.net) every night. It makes encrypted, deduplicated backups of all app data to a second disk, keeping 24 hourly, 30 daily and 12 monthly copies.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screens/tinyauth.jpg" alt="Tinyauth login page"></td>
+    <td width="50%"><img src="docs/screens/npm.png" alt="Nginx Proxy Manager: each casa.home name and the container it points to"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Tinyauth</b>: the shared login page</sub></td>
+    <td align="center"><sub><b>Nginx Proxy Manager</b>: one name per app, mapped to a container</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screens/adguard.png" alt="AdGuard Home counters: DNS queries and blocked requests"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><sub><b>AdGuard Home</b>: about 12 % of all lookups are ads or trackers, blocked for every device</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="docs/screens/backrest.png" width="80%" alt="Backrest: daily backup plan and its history"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><sub><b>Backrest</b>: the nightly plan, its 30-day history and recent runs</sub></td>
+  </tr>
+</table>
+
+### `media`: films, from request to screen
+
+A small pipeline where each app does one job:
+
+1. **Jellyseerr**: someone asks for a film.
+2. **Radarr** takes the request and asks **Prowlarr** to search the configured indexers. **Byparr** solves the Cloudflare challenges some of them show.
+3. Radarr sends the best result to **qBittorrent**. qBittorrent has no network of its own: it lives inside **Gluetun**, whose firewall lets traffic out only through the ProtonVPN WireGuard tunnel. If the VPN drops, downloads stop instead of leaking. A small sidecar keeps qBittorrent's listening port equal to the one ProtonVPN forwards.
+4. When the download finishes, Radarr renames the film and files it into the library. **Bazarr** adds subtitles.
+5. **Jellyfin** streams it to the TV, phones and browsers.
+
+![Jellyfin home screen](docs/screens/jellyfin.jpg)
+
+### `monitoring`: is it up, and what is it using
+
+- **Uptime Kuma** checks all 17 services every minute by container name. It also publishes a status page.
+- **Beszel** keeps the history of CPU, memory, disk, network and GPU for the host and for every container. Its agent reads Docker through a read-only socket proxy, never the socket itself.
+
+![Beszel: CPU and memory history for the host and per container](docs/screens/beszel.png)
+
+<p align="center"><img src="docs/screens/kuma-status.png" width="70%" alt="Uptime Kuma public status page: all systems operational"><br><sub><b>Uptime Kuma</b>: the public status page</sub></p>
+
+### `portal`: one page for everything
+
+[Homepage](https://gethomepage.dev) with a custom glass theme and live widgets. It is configured entirely inside its `compose.yaml`: settings, services, custom CSS and a small script. The ⓘ on each card opens a panel explaining that app: what it does, its stack, its login and its addresses.
+
+![The portal](docs/screens/portal.png)
+
+### `tools`: small everyday utilities
+
+- **Stirling-PDF**: merge, split, compress, sign and OCR PDFs (with Spanish OCR), without uploading them anywhere.
+- **PairDrop**: AirDrop for every device at home; files go device to device over WebRTC.
+- **Neko**: a Firefox running in a container and streamed to any device over WebRTC. Several people can share it, and it starts clean on every deploy.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screens/stirling.png" alt="Stirling-PDF tool list"></td>
+    <td width="50%"><img src="docs/screens/neko.png" alt="Neko streaming Firefox"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Stirling-PDF</b>: every PDF tool, running locally</sub></td>
+    <td align="center"><sub><b>Neko</b>: Firefox in a container, in your browser</sub></td>
+  </tr>
+</table>
+
+### `trek`: travel planning
+
+[TREK](https://github.com/liketrek/TREK) plans trips: days, places on a map, bookings, budget and packing lists, shared with other travellers. It keeps its own accounts because other people use it too, and it exposes an MCP endpoint so trips can also be planned from an assistant.
 
 ## Design decisions
 
