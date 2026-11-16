@@ -142,10 +142,11 @@ Each stack folder holds:
 
 ## Roadmap
 
-Planned, not deployed. Each becomes its own stack when started.
+Planned, not deployed. Choose the appropriate stack when implementation starts.
 
 | Item | Status | Waits for |
 | --- | --- | --- |
+| [Cobalt](https://github.com/imputnet/cobalt) (candidate for `tools`) | Planned | Self-host both the web frontend and processing API; verify Docker packaging, local proxy/Tinyauth and browser-to-API access, platform compatibility and any required cookies before deployment. No public exposure |
 | Vaultwarden (`vault`), homelab passwords only | Planned | HTTPS: Bitwarden clients refuse plain HTTP; serve it through Tailscale HTTPS or a trusted local certificate |
 | Tailscale (remote access to `*.casa.home`) | Client installed on the Windows host | Subnet route or DNS setup |
 | Immich (`photos`) | Postponed | Photo storage location and an offsite backup (photos are irreplaceable) |
