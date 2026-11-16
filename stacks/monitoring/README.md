@@ -8,7 +8,7 @@ Its own stack on purpose: it must keep running while the stacks it watches (incl
 
 ## Deploy with Dockhand
 
-Git stack `monitoring`: repository `homelab`, branch `main`, compose file `stacks/monitoring/compose.yaml`. Stack variables (no secrets):
+Git stack `monitoring`: repository `homelab`, branch `main`, compose file `stacks/monitoring/compose.yaml`. Stack variables (store the agent key and token as secrets):
 
 | Variable | Windows PC value |
 | --- | --- |
@@ -68,7 +68,7 @@ Status page `homelab` (slug) lists every monitor; the portal's Uptime Kuma widge
 
 ## Data and backup
 
-`${DATA_ROOT}/uptime-kuma` (SQLite: monitors, history, account). Backed up with the rest of `DATA_ROOT`.
+`${DATA_ROOT}/uptime-kuma` holds monitors, history and account data; `${DATA_ROOT}/beszel` holds the Beszel hub data. Both are included in the documented `DATA_ROOT` backup plan. Agent credentials are stored in Dockhand.
 
 ## Checklist
 

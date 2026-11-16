@@ -21,7 +21,9 @@ Git stack `media`, compose file `stacks/media/compose.yaml`, variables from `.en
 | `${MEDIA_ROOT}/media/` | Films | No: re-downloadable; protect separately if needed |
 | `${MEDIA_ROOT}/downloads/` | qBittorrent downloads | No |
 
-## Cutover from the old stack
+## Historical cutover from the old stack
+
+Record of the 2026-11-12 migration, not a current deployment procedure. Paths and proxy names may have changed; never run the old and new stacks together.
 
 1. Backup run in Backrest.
 2. Old stack: `docker compose stop` then `docker compose rm -f` in `<old-project>` (its config and data stay untouched as rollback).
@@ -29,7 +31,7 @@ Git stack `media`, compose file `stacks/media/compose.yaml`, variables from `.en
 4. Redeploy `infra` (Nginx drops the old `streaming_default` network), then deploy `media` from Dockhand.
 5. Verify: gluetun healthy with a ProtonVPN IP and a forwarded port synced into qBittorrent; Radarr and Prowlarr connected; Jellyfin libraries and users intact; all `*.home` names respond.
 
-**Rollback:** remove the `media` stack in Dockhand (keep files), then `docker compose up -d` the media services in `<old-project>` (and re-add `streaming_default` to npm if needed).
+**Historical rollback:** the original procedure used the old `<old-project>` files and `streaming_default` network. Those files are no longer backed up; this is not a validated current recovery procedure. Verify current backups, paths and ownership before planning any rollback.
 
 ## Checklist
 

@@ -24,7 +24,8 @@ flowchart LR
   end
 
   subgraph MONITORING["monitoring"]
-    kuma["Uptime Kuma<br/>alerts when a service is down"]
+    kuma["Uptime Kuma<br/>availability checks"]
+    beszel["Beszel hub · agent · socket proxy<br/>resource monitoring"]
   end
 
   subgraph PORTAL["portal"]
@@ -32,11 +33,11 @@ flowchart LR
   end
 
   subgraph TOOLS["tools"]
-    tools["PairDrop · Stirling-PDF<br/>file sharing and PDFs"]
+    tools["PairDrop · Stirling-PDF · Neko<br/>file sharing, PDFs and browser"]
   end
 
   subgraph MEDIA["media"]
-    media["Jellyfin · Radarr<br/>qBittorrent · VPN"]
+    media["Jellyfin · Jellyseerr · Radarr · Prowlarr · Bazarr<br/>Byparr · qBittorrent · Gluetun · port sync"]
   end
 
   data[("homelab-data<br/>app data")]
@@ -49,7 +50,7 @@ flowchart LR
   dockhand -- deploys --> MONITORING
   dockhand -- deploys --> PORTAL
   dockhand -- deploys --> TOOLS
-  INFRA & TREK & MEDIA & MONITORING & TOOLS --> data
+  DOCKHAND & INFRA & TREK & MEDIA & MONITORING & TOOLS --> data
   MEDIA --> films[("films and downloads<br/>MEDIA_ROOT")]
   data -- every 24 h --> backups
 
@@ -65,7 +66,7 @@ flowchart LR
   class adguard,npm,backrest,tinyauth infra
   class trek trek
   class media media
-  class kuma monitoring
+  class kuma,beszel monitoring
   class homepage portal
   class tools tools
   class git,data,backups,films storage
@@ -85,19 +86,19 @@ One color per stack. Recipes live in Git, secrets in Dockhand, data in `homelab-
 ```text
 stacks/
   dockhand/ # the stack manager; the only stack started by hand
-  infra/    # AdGuard (DNS), Nginx Proxy Manager, Backrest; creates the `proxy` network; managed by Dockhand
+  infra/    # AdGuard, Nginx Proxy Manager, Tinyauth and Backrest; uses the shared `proxy` network
   media/    # Jellyfin, Jellyseerr, Radarr, Prowlarr, Bazarr, qBittorrent behind ProtonVPN
   trek/     # TREK travel planner; first Git stack (pilot)
-  monitoring/ # Uptime Kuma: checks every service, separate so it survives other stacks' redeploys
+  monitoring/ # Uptime Kuma and Beszel; separate so monitoring survives other stacks' redeploys
   portal/   # Homepage: every app on one page; its configuration is inline in compose.yaml
-  tools/    # PairDrop (send files between devices) and Stirling-PDF (PDF toolbox)
+  tools/    # PairDrop, Stirling-PDF and Neko
   photos/   # planned: Immich candidate
   paas/     # planned: Coolify/Dokploy, on its own host/VM, not managed by Dockhand
 hosts/
   example.env   # template for host-specific values; real files stay private
 ```
 
-On the host everything lives under one folder, so moving the homelab means copying it:
+On the current host, the repository, application data and media live under one folder; backups are on a separate disk:
 
 ```text
 E:\homelab\            (/srv/homelab on Linux)
@@ -120,15 +121,15 @@ Each stack folder holds:
 | --- | --- | --- |
 | Definition | `stacks/<name>/` | Yes |
 | Secrets | Dockhand per-stack variables (encrypted in its database); host file only for `dockhand/` | Never |
-| Application data | `${DATA_ROOT}/<stack>/` bind mounts | No; per-stack backups |
+| Application data | Bind mounts under `${DATA_ROOT}` (paths vary by stack) | No; `DATA_ROOT` backup plan |
 | Bulk media | `${MEDIA_ROOT}` on a separate disk | No; moved or copied directly |
 
 ## Rules
 
-- Paths, `PUID`/`PGID` and `TZ` come from the host file. A missing variable fails (`${VAR:?...}`) instead of falling back to a path.
-- Bind mounts under `DATA_ROOT`, not anonymous volumes: copying a folder copies a stack's state.
+- Host-specific paths and settings come from the host file or Dockhand stack variables. Required paths and secrets use `${VAR:?...}`; some settings, including `PUID`, `PGID` and `TZ`, have defaults in Compose.
+- Persistent application state uses bind mounts under `DATA_ROOT`; media files use `MEDIA_ROOT`. The `media` stack also has a named `gluetun_port` volume for VPN port synchronization.
 - Every Compose file sets `name:` so the project name does not depend on its folder.
-- Every service caps its logs (`logging: *logging`, 3 x 10 MB): Docker keeps container logs forever by default.
+- Every service caps its logs (3 x 10 MB; most use `logging: *logging`): Docker keeps container logs forever by default.
 - Services that can spike (TREK, Neko, Byparr) get `cpus: 2`: on 2026-11-16 TREK took 12 cores and every other stack, npm and Tinyauth included, stopped answering.
 - Services are reached by hostname through the reverse proxy and local DNS, not `IP:port`. Web UIs protected by Tinyauth publish their port on `127.0.0.1` only, so the LAN cannot bypass the login.
 - No Docker Desktop–only features (`host.docker.internal`, Windows paths, named pipes).
@@ -160,7 +161,7 @@ Some settings live in app databases, not in Git: npm proxy hosts (and their Tiny
 
 - `scripts/snapshot_config.py <DATA_ROOT>` reads the app files read-only and writes the JSON. Secret values are replaced by `<secret>` (Dockhand secrets and any variable named `*KEY*`, `*TOKEN*`, `*PASSWORD*`, `*SECRET*`); the script refuses to write output that still looks like a key or hash.
 - `scripts/snapshot-config.sh hosts/<host>.env` runs it in a separate worktree (`../snapshot-worktree`) and opens a PR "Configuration snapshot <date>" only when something changed. Run it daily and at logon (Windows: Task Scheduler; Linux: a systemd timer or cron).
-- Snapshots are a record, not a source of truth: restoring means re-entering these values in each app.
+- Snapshots are a redacted record, not a backup or a source of truth. They can help re-enter settings manually; restoring application data from backup is a separate workflow. Snapshot contents may lag behind the running system.
 
 ## Moving to a new host
 
@@ -170,4 +171,4 @@ Some settings live in app databases, not in Git: npm proxy hosts (and their Tiny
 4. Create the shared network once (`docker network create proxy`), start `stacks/dockhand` by hand; in Dockhand, update `DATA_ROOT` / `MEDIA_ROOT` / `BACKUP_ROOT` on each stack and deploy `infra` first, then the rest.
 5. Repoint local DNS to the new host (router DHCP and the AdGuard `*.home` rewrite, which covers `*.casa.home`); verify every stack before retiring the old one.
 
-A stack is migration-ready only after it has been restored from backup at least once.
+The documented restore test verified file contents only; starting restored Dockhand and confirming its secrets decrypt remains pending. An offsite backup is also pending. A stack is migration-ready only after it has been restored from backup and verified at least once.
