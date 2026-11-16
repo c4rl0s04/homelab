@@ -5,6 +5,7 @@ Small everyday tools with no shared state, so they can be stopped or redeployed 
 | Service | What it does | Name | Login |
 | --- | --- | --- | --- |
 | [PairDrop](https://github.com/schlagmichdoch/PairDrop) | Send files between devices on the home network, like AirDrop | `drop.casa.home` → `pairdrop:3000` | None: anyone on the home network can use it |
+| [Neko](https://github.com/m1k1o/neko) | A Firefox inside a container, streamed to any device; several people can use it at once | `browser.casa.home` → `neko:8080` | Tinyauth (its own login is off) |
 | [Stirling-PDF](https://github.com/Stirling-Tools/Stirling-PDF) | Merge, split, compress, OCR and sign PDFs locally | `pdf.casa.home` → `stirling-pdf:8080` | Tinyauth (its own login is off) |
 
 ## Deploy with Dockhand
@@ -15,12 +16,14 @@ Git stack `tools`: repository `homelab`, branch `main`, compose file `stacks/too
 | --- | --- |
 | `DATA_ROOT` | `E:/homelab/data` |
 | `TZ` | `Europe/Madrid` |
+| `HOST_IP` | `192.168.1.10` (this machine's LAN address, reserved in the router) |
 
-Optional: `PAIRDROP_PORT` (3005), `STIRLING_PDF_PORT` (3006), both on `127.0.0.1` only.
+Optional: `PAIRDROP_PORT` (3005), `STIRLING_PDF_PORT` (3006), `NEKO_PORT` (3008), all on `127.0.0.1` only.
 
 npm proxy hosts:
 
 - `drop.casa.home` → `http://pairdrop:3000`, websockets on, no Tinyauth. PairDrop groups devices by the client address npm passes in `X-Forwarded-For`; private addresses all count as one network, so every device at home sees the others.
+- `browser.casa.home` → `http://neko:8080`, websockets on, with the Tinyauth block.
 - `pdf.casa.home` → `http://stirling-pdf:8080`, with the Tinyauth block from `stacks/infra/README.md`.
 
 ## Notes
@@ -36,10 +39,16 @@ npm proxy hosts:
 
   It is part of `DATA_ROOT`, so a restored backup already has it.
 
+- Neko streams video and input over WebRTC on UDP 52000–52100. These ports are published on `HOST_IP`, the LAN address, and announced with `NEKO_WEBRTC_NAT1TO1`; the web page itself only sets up the connection.
+  - It has no own login (`noauth`), so everyone who passes Tinyauth is an admin.
+  - The browser is not saved: a redeploy starts it clean.
+  - It uses up to 3 GB of memory.
+
 ## Checklist
 
 - [x] Deployed as a Git stack (2026-11-15); `drop.casa.home` answers (websocket upgrade 101) and `pdf.casa.home` redirects to Tinyauth; ports 3005/3006 are not reachable from the LAN.
 - [ ] PairDrop: a phone and the PC see each other and a file goes through.
 - [ ] Stirling-PDF: opens without its own login behind Tinyauth; merge two PDFs; OCR a scanned page in Spanish.
+- [ ] Neko: video plays on the PC and on a phone; typing and clicking work.
 - [x] Portal cards and Uptime Kuma monitors added (2026-11-15, both green).
 - [x] Spanish OCR: `tesseract --list-langs` in the container lists `spa` (PR #25).

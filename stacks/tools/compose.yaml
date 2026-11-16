@@ -43,6 +43,31 @@ services:
     networks:
       - proxy # pdf.casa.home
 
+  # A Firefox that lives in a container, streamed to any device over WebRTC; several people can share it.
+  # Nothing is kept: a redeploy starts a clean browser.
+  neko:
+    image: ghcr.io/m1k1o/neko/firefox:3.2.0
+    container_name: neko
+    logging: *logging
+    restart: unless-stopped
+    shm_size: 2gb
+    mem_limit: 3g
+    ports:
+      - "127.0.0.1:${NEKO_PORT:-3008}:8080"
+      # Video and input travel over these UDP ports, straight from the LAN (HOST_IP: this machine's LAN address).
+      - "${HOST_IP:?Set HOST_IP}:52000-52100:52000-52100/udp"
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      NEKO_DESKTOP_SCREEN: 1920x1080@30
+      # No own login: everyone who passes Tinyauth is admin, which is only the owner today.
+      NEKO_MEMBER_PROVIDER: noauth
+      NEKO_SESSION_COOKIE_SECURE: "false" # plain HTTP on the LAN
+      NEKO_WEBRTC_EPR: 52000-52100
+      NEKO_WEBRTC_ICELITE: "1"
+      NEKO_WEBRTC_NAT1TO1: ${HOST_IP:?Set HOST_IP}
+    networks:
+      - proxy # browser.casa.home
+
 networks:
   proxy:
     name: proxy

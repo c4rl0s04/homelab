@@ -2,6 +2,8 @@
 
 [Uptime Kuma](https://github.com/louislam/uptime-kuma): checks every web service and alerts when one stops answering.
 
+It also runs [Beszel](https://github.com/henrygd/beszel): history of CPU, memory, network, disk and GPU for the host and each container. Kuma answers "is it up?"; Beszel answers "what is using the machine?".
+
 Its own stack on purpose: it must keep running while the stacks it watches (including `infra`) are stopped or redeployed.
 
 ## Deploy with Dockhand
@@ -12,8 +14,10 @@ Git stack `monitoring`: repository `homelab`, branch `main`, compose file `stack
 | --- | --- |
 | `DATA_ROOT` | `E:/homelab/data` |
 | `TZ` | `Europe/Madrid` |
+| `BESZEL_AGENT_KEY` | Secret, from Beszel's "Add system" |
+| `BESZEL_AGENT_TOKEN` | Secret, from Beszel's "Add system" |
 
-Optional: `UPTIME_KUMA_PORT` (3003). After deploying, open `http://status.casa.home` (npm proxy host → `uptime-kuma:3001`, websockets on, behind Tinyauth; its own login is disabled).
+Optional: `UPTIME_KUMA_PORT` (3003), `BESZEL_PORT` (3007), `PROXY_SUBNET` (`172.21.0.0/16`, the `proxy` network). After deploying, open `http://status.casa.home` (npm proxy host → `uptime-kuma:3001`, websockets on, behind Tinyauth; its own login is disabled).
 
 ## Monitors
 
@@ -34,8 +38,29 @@ Check services by container name on the `proxy` network, not by `*.casa.home` (t
 | Bazarr | `http://bazarr:6767` |
 | PairDrop | `http://pairdrop:3000` |
 | Stirling-PDF | `http://stirling-pdf:8080` |
+| Neko | `http://neko:8080` |
+| Beszel | `http://beszel:8090/api/health` |
 
 One DNS monitor resolves `jellyfin.casa.home` against the host IP (`192.168.1.10`) to cover AdGuard itself. It goes through the Windows host network, so it fails while ProtonVPN is connected on the host (which blocks DNS to other servers); LAN devices are not affected. Expect it to recover on the mini PC.
+
+## Beszel
+
+Three containers:
+
+- `beszel` is the hub, the web page at `beszel.casa.home`.
+- `beszel-agent` collects the numbers. It uses the NVIDIA image and is given the GPU, which works on Docker Desktop with WSL2.
+- `beszel-socket-proxy` gives the agent read-only access to the container list and stats, so the agent never touches the Docker socket itself.
+
+The agent and the proxy sit on an internal network with no internet access. On Docker Desktop the "host" Beszel sees is Docker's Linux VM, not Windows itself.
+
+**First start**
+
+1. Deploy, then open `beszel.casa.home` and create the account with email `user@casa.home`. That is the address Tinyauth sends for the user `user`: the username, lowercased, at the cookie domain.
+2. In Beszel, click **Add system**: name `windows-pc`, host `beszel-agent`. Copy the **Key** and **Token** into Dockhand as secrets `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN`, then redeploy `monitoring`. Until then the agent exits and retries.
+
+**One login**
+
+npm forwards Tinyauth's `Remote-Email` header to Beszel, which logs in the user with that email. Beszel trusts the header only from the `proxy` network (`TRUSTED_PROXY_IPS`), so opening the loopback port directly still asks for a password.
 
 ## Status page
 

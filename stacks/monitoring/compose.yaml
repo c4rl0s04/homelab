@@ -25,7 +25,71 @@ services:
     networks:
       - proxy # status.home, and checks other services by container name
 
+  # Resource history: CPU, memory, network, disk and GPU for the host and every container.
+  beszel:
+    image: henrygd/beszel:0.21.2
+    container_name: beszel
+    logging: *logging
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${BESZEL_PORT:-3007}:8090"
+    environment:
+      APP_URL: http://beszel.casa.home
+      # One login: npm passes Tinyauth's user as Remote-Email (user@casa.home); Beszel trusts it
+      # only from the proxy network, so a direct visit to the loopback port still asks for a password.
+      TRUSTED_AUTH_HEADER: Remote-Email
+      TRUSTED_PROXY_IPS: ${PROXY_SUBNET:-172.21.0.0/16}
+    volumes:
+      - ${DATA_ROOT:?Set DATA_ROOT}/beszel:/beszel_data
+    networks:
+      - proxy # beszel.casa.home
+      - beszel
+
+  # Collects the numbers and sends them to the hub. The KEY and TOKEN come from the hub ("Add system")
+  # after the first start; until they are set in Dockhand the agent exits and retries.
+  beszel-agent:
+    image: henrygd/beszel-agent-nvidia:0.21.2
+    container_name: beszel-agent
+    logging: *logging
+    restart: unless-stopped
+    environment:
+      HUB_URL: http://beszel:8090
+      KEY: ${BESZEL_AGENT_KEY:-}
+      TOKEN: ${BESZEL_AGENT_TOKEN:-}
+      DOCKER_HOST: tcp://beszel-socket-proxy:2375
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, utility]
+    networks:
+      - beszel
+    depends_on:
+      - beszel
+      - beszel-socket-proxy
+
+  # Read-only window on Docker for the agent: container list and stats only, never create, exec or delete.
+  beszel-socket-proxy:
+    image: lscr.io/linuxserver/socket-proxy:3.4.7
+    container_name: beszel-socket-proxy
+    logging: *logging
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /run
+    environment:
+      CONTAINERS: 1
+      INFO: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - beszel
+
 networks:
   proxy:
     name: proxy
     external: true
+  beszel:
+    internal: true # agent and socket proxy: no internet, no other stacks
