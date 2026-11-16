@@ -146,7 +146,7 @@ A small pipeline where each app does one job:
 
 - **Stirling-PDF**: merge, split, compress, sign and OCR PDFs (with Spanish OCR), without uploading them anywhere.
 - **PairDrop**: AirDrop for every device at home; files go device to device over WebRTC.
-- **Neko**: a Firefox running in a container and streamed to any device over WebRTC. Several people can share it, and it starts clean on every deploy.
+- **Neko**: a Firefox running in a container and streamed to any device over WebRTC. Several people can share it, and it starts clean on every deploy. It is kept but switched off by default (a Compose profile): over this network it was too slow for daily use.
 
 <table>
   <tr>

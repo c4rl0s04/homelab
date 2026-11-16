@@ -39,6 +39,7 @@ npm proxy hosts:
 
   It is part of `DATA_ROOT`, so a restored backup already has it.
 
+- **Neko is off by default** (Compose profile `neko`): over the LAN it was too slow to be useful. To use it, add the stack variable `COMPOSE_PROFILES=neko` to `tools` in Dockhand and deploy; remove it and deploy again (then `docker rm -f neko`) to turn it off. Its npm name, portal card and Kuma monitor (paused) stay in place.
 - Neko streams video and input over WebRTC on UDP 52000–52100. These ports are published on `HOST_IP`, the LAN address, and announced with `NEKO_WEBRTC_NAT1TO1`; the web page itself only sets up the connection.
   - It has no own login (`noauth`), so everyone who passes Tinyauth is an admin.
   - The browser is not saved: a redeploy starts it clean.

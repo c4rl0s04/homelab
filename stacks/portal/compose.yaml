@@ -159,8 +159,7 @@ configs:
           - Neko:
               icon: firefox.png
               href: http://browser.casa.home
-              description: Navegador compartido
-              siteMonitor: http://neko:8080
+              description: Apagado · se enciende desde Dockhand
       - Sistema:
           - Dockhand:
               icon: mdi-docker
