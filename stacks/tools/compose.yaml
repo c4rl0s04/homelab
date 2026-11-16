@@ -48,6 +48,7 @@ services:
   neko:
     image: ghcr.io/m1k1o/neko/firefox:3.2.0
     container_name: neko
+    cpus: 2 # video encoding takes what it can; keep it from slowing npm and Tinyauth
     logging: *logging
     restart: unless-stopped
     shm_size: 2gb
