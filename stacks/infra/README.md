@@ -96,7 +96,7 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
 | --- | --- |
 | Repository | `homelab-local` → `/repos/homelab` = `${BACKUP_ROOT}/homelab` (an SSD, a different disk from `DATA_ROOT`) |
 | Plan | `homelab-daily`: `/userdata/homelab-data` |
-| Excludes | `homelab-data/backrest/cache`, `__pycache__` |
+| Excludes | `homelab-data/backrest/cache`, `__pycache__`, and app log folders (`media/*/log`, `media/*/logs`, `media/qbittorrent/qBittorrent/logs`, `npm/logs`, `trek/data/logs`): about 60 MB that changes constantly and once made a run end "with warnings" when Radarr rotated a log mid-backup (2026-11-15) |
 | Schedule | Every 24 h counted from the last run, so a backup runs soon after the PC is switched on |
 | Retention | 24 hourly, 30 daily, 12 monthly |
 
