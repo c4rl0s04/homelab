@@ -60,6 +60,11 @@ Optional: `ADGUARD_UI_PORT` (3000), `NPM_ADMIN_PORT` (81), `BACKREST_PORT` (9898
   ```nginx
   location / {
     include conf.d/include/proxy.conf;
+    # Defining proxy_set_header here stops npm's server-level websocket headers from being inherited,
+    # so they are repeated: without them Neko never loads and Kuma or Dockhand fall back to polling.
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $http_connection;
     auth_request /tinyauth;
     auth_request_set $redirection_url $upstream_http_x_tinyauth_location;
     error_page 401 403 =302 $redirection_url;
