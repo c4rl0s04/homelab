@@ -72,11 +72,11 @@ configs:
           icon: mdi-bookshelf
         Herramientas:
           style: row
-          columns: 3
+          columns: 4
           icon: mdi-toolbox-outline
         Sistema:
           style: row
-          columns: 5
+          columns: 3
           icon: mdi-server-outline
 
   services:
@@ -156,6 +156,11 @@ configs:
               href: http://pdf.casa.home
               description: Herramientas PDF
               siteMonitor: http://stirling-pdf:8080
+          - Neko:
+              icon: firefox.png
+              href: http://browser.casa.home
+              description: Navegador compartido
+              siteMonitor: http://neko:8080
       - Sistema:
           - Dockhand:
               icon: mdi-docker
@@ -189,6 +194,11 @@ configs:
               href: http://backrest.casa.home
               description: Copias de seguridad
               siteMonitor: http://backrest:9898
+          - Beszel:
+              icon: beszel.png
+              href: http://beszel.casa.home
+              description: Consumo de cada contenedor
+              siteMonitor: http://beszel:8090
 
   widgets:
     content: |
@@ -447,6 +457,8 @@ configs:
           "AdGuard": { what: "El DNS de casa: bloquea anuncios y resuelve los nombres .casa.home.", stack: "infra", login: TINY, addr: "adguardhome:3000" },
           "Nginx Proxy Manager": { what: "Lleva cada nombre .casa.home a su app y pide el login común donde toca.", stack: "infra", login: "Login propio (no depende del común)", addr: "npm:81" },
           "Backrest": { what: "Copias de seguridad de los datos del homelab.", stack: "infra", login: TINY, addr: "backrest:9898", tip: "Copia cada 24 horas a otro disco." },
+        "Beszel": { what: "Gráficas de CPU, memoria, red y gráfica del PC y de cada contenedor, con historial.", stack: "monitoring", login: TINY, addr: "beszel:8090", tip: "Kuma te dice si algo se cae; Beszel te dice qué está consumiendo." },
+        "Neko": { what: "Un Firefox que vive en un contenedor y se ve desde cualquier dispositivo; varias personas pueden usarlo a la vez.", stack: "tools", login: TINY, addr: "neko:8080", tip: "No guarda nada: al volver a desplegarlo empieza limpio." },
         };
         const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">$${d}</svg>`;
         const ICON_INFO = svg('<circle cx="12" cy="12" r="9"/><path d="M12 16v-4.5M12 8h.01"/>');
