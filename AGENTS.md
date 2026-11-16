@@ -15,7 +15,7 @@ Read `README.md` first: it defines the stack layout, layers and portability rule
 ## Documentation
 
 - `docs/architecture.html` is the architecture map (self-contained, logos inlined); `docs/architecture.png` and `docs/architecture-dark.png` are its screenshots used by `README.md`. Update it in the same change that adds, removes or moves a stack or a service, then re-render both PNGs (headless Chromium/Edge, window 1640x1250, scale 2; dark = `data-theme="dark"` on `<html>`). Keep it to what is actually deployed; planned items stay in the README roadmap.
-- `README.md` is the public showcase; operator detail belongs in each stack's README. Retake the portal and status screenshots in `docs/` when the portal changes visibly.
+- `README.md` is the public showcase; operator detail belongs in each stack's README. Screenshots live in `docs/screens/`; retake the affected one when a UI changes visibly, and check it for private data (usernames, IPs, visited domains) before committing.
 
 ## Safety
 
