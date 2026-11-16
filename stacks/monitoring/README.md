@@ -40,6 +40,9 @@ Check services by container name on the `proxy` network, not by `*.casa.home` (t
 | Stirling-PDF | `http://stirling-pdf:8080` |
 | Neko | `http://neko:8080` |
 | Beszel | `http://beszel:8090/api/health` |
+| Homepage (portal) | `http://homepage:3000`, with header `Host: portal.casa.home` (Homepage rejects host names outside `HOMEPAGE_ALLOWED_HOSTS`) |
+
+The Neko monitor is paused while Neko is off (see `stacks/tools/README.md`). Monitors live in Kuma's database, not in Git: add one here and in Kuma when a service is added.
 
 One DNS monitor resolves `jellyfin.casa.home` against the host's LAN IP to cover AdGuard itself. It goes through the Windows host network, so it fails while ProtonVPN is connected on the host (which blocks DNS to other servers); LAN devices are not affected. Expect it to recover on the mini PC.
 
@@ -61,6 +64,13 @@ The agent and the proxy sit on an internal network with no internet access. On D
 **One login**
 
 npm forwards Tinyauth's `Remote-Email` header to Beszel, which logs in the user with that email. Beszel trusts the header only from the `proxy` network (`TRUSTED_PROXY_IPS`), so opening the loopback port directly still asks for a password.
+
+The `beszel.casa.home` proxy host uses the Tinyauth block from `stacks/infra/README.md` with two extra lines inside `location /`, after `auth_request_set $redirection_url …`. They always overwrite the header, so a client cannot send its own:
+
+```nginx
+auth_request_set $tinyauth_email $upstream_http_remote_email;
+proxy_set_header Remote-Email $tinyauth_email;
+```
 
 ## Status page
 

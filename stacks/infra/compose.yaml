@@ -8,7 +8,7 @@ x-logging: &logging
     max-file: "3"
 
 services:
-  # Home DNS: ad blocking and *.home names for every device on the network.
+  # Home DNS: ad blocking and *.casa.home names for every device on the network.
   adguardhome:
     # Same image digest as the previous media stack, so the moved config loads unchanged.
     image: adguard/adguardhome@sha256:aba9e3bf0613be3ba3755e1fc311b126e2c24bec25e18b6483894a88283074f0
@@ -27,9 +27,9 @@ services:
       - ${DATA_ROOT:?Set DATA_ROOT}/adguardhome/conf:/opt/adguardhome/conf
     networks:
       - default
-      - proxy # adguard.home
+      - proxy # adguard.casa.home
 
-  # Reverse proxy: single entry point (80/443) that forwards *.home to each stack's web service.
+  # Reverse proxy: single entry point (80/443) that forwards *.casa.home to each stack's web service.
   npm:
     image: jc21/nginx-proxy-manager@sha256:4393e642e233e5efd5adeb7f10918d4aaea71c9ed875b94190273fc8e87f9594
     container_name: npm
@@ -71,7 +71,7 @@ services:
       - ${BACKUP_ROOT:?Set BACKUP_ROOT}:/repos
     networks:
       - default
-      - proxy # backrest.home
+      - proxy # backrest.casa.home
 
   # Single login for the web UIs: npm asks it before serving a protected *.casa.home name.
   tinyauth:

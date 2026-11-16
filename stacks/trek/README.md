@@ -1,10 +1,12 @@
 # trek
 
-[TREK](https://github.com/mauriceboe/TREK): self-hosted collaborative travel planner (AGPL-3.0). First stack deployed from Git through Dockhand.
+[TREK](https://github.com/liketrek/TREK): self-hosted collaborative travel planner (AGPL-3.0). First stack deployed from Git through Dockhand.
+
+One container, `trek`, on its own default network plus `proxy`. Upstream hardening is kept (read-only root filesystem, all capabilities dropped but four), and it is capped at 2 CPUs: on 2026-11-16 piled-up MCP sessions took 12 cores and starved every other stack.
 
 ## Deploy with Dockhand
 
-1. **Stacks → Git stack**, repository `c4rl0s04/homelab`, branch `main`, compose file `stacks/trek/compose.yaml`. The repository is private: give Dockhand a fine-grained GitHub token with read-only *Contents* access to this repository only.
+1. **Stacks → Git stack**, repository `homelab`, branch `main`, compose file `stacks/trek/compose.yaml`. Dockhand reads it with the same GitHub token as the other stacks (see `stacks/dockhand/README.md`).
 2. Add the stack variables from `.env.example`. `TREK_ENCRYPTION_KEY` is a secret: generate it once and keep it only in Dockhand.
 3. **Create** only registers the stack ("no desplegado"). Press **Deploy** on its row and confirm the Git sync, then open `http://127.0.0.1:3002` and follow the first-login instructions below.
 
@@ -13,6 +15,8 @@
 `http://trek.casa.home`, with TREK's own accounts (not behind Tinyauth). Over plain HTTP the session cookie must not be marked Secure, so `COOKIE_SECURE` defaults to `false`; set `TREK_COOKIE_SECURE=true` once the name is served over HTTPS.
 
 **First login / locked out:** the first start creates an `admin` account (`admin@trek.local`) and prints a random password to the container log only once. To get in again, run `docker exec -it -u node trek node server/reset-admin.js`: it prints a temporary password and forces a new one at first login. Run it yourself; the password appears in the terminal.
+
+**MCP:** TREK serves an MCP endpoint at `/mcp`, used from the host as `http://127.0.0.1:3002/mcp` with a static per-user token created in TREK's settings. The token stays in the MCP client's config, never in Git. TREK has deprecated static tokens in favour of OAuth; moving over is pending.
 
 ## Data and backup
 
