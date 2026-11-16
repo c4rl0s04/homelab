@@ -129,6 +129,7 @@ Each stack folder holds:
 - Bind mounts under `DATA_ROOT`, not anonymous volumes: copying a folder copies a stack's state.
 - Every Compose file sets `name:` so the project name does not depend on its folder.
 - Every service caps its logs (`logging: *logging`, 3 x 10 MB): Docker keeps container logs forever by default.
+- Services that can spike (TREK, Neko, Byparr) get `cpus: 2`: on 2026-11-16 TREK took 12 cores and every other stack, npm and Tinyauth included, stopped answering.
 - Services are reached by hostname through the reverse proxy and local DNS, not `IP:port`. Web UIs protected by Tinyauth publish their port on `127.0.0.1` only, so the LAN cannot bypass the login.
 - No Docker Desktop–only features (`host.docker.internal`, Windows paths, named pipes).
 - One manager per stack: Dockhand manages everything except itself (`dockhand/`, by hand) and `paas/` (its own platform).
