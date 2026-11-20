@@ -227,6 +227,7 @@ Each stack README lists its own variables and first-start steps.
 | Vaultwarden (homelab passwords) | HTTPS (Tailscale certificates) |
 | Local AI: Ollama with offline Wikipedia (Kiwix) | GPU passthrough already verified on this host; needs more Docker memory |
 | [Cobalt](https://github.com/imputnet/cobalt) media downloader (`tools`) | Packaging and access checks |
+| [Soulbeet](https://github.com/terry90/soulbeet) music downloader (Soulseek through slskd, tagged by beets) | A music library and player (Jellyfin music or Navidrome); slskd behind the VPN like qBittorrent |
 | Immich (photos) | Photo storage and an offsite backup |
 | Home Assistant (WiZ lights, HomePod) | The mini PC (host networking) |
 
