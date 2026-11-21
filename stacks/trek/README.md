@@ -16,7 +16,7 @@ One container, `trek`, on its own default network plus `proxy`. Upstream hardeni
 
 **First login / locked out:** the first start creates an `admin` account (`admin@trek.local`) and prints a random password to the container log only once. To get in again, run `docker exec -it -u node trek node server/reset-admin.js`: it prints a temporary password and forces a new one at first login. Run it yourself; the password appears in the terminal.
 
-**MCP:** TREK serves an MCP endpoint at `/mcp`, used from the host as `http://127.0.0.1:3002/mcp` with a static per-user token created in TREK's settings. The token stays in the MCP client's config, never in Git. TREK has deprecated static tokens in favour of OAuth; moving over is pending.
+**MCP:** From the host, connect to `http://localhost:3002/mcp` using OAuth. `TREK_APP_URL` defaults to `http://localhost` on the published port so OAuth discovery advertises an address the client can reach. If you override it, set it to the origin used by the MCP client and include that origin in `TREK_ALLOWED_ORIGINS` if you override that list too. Start with the `trips:read` scope to list trips and read itineraries.
 
 ## Data and backup
 

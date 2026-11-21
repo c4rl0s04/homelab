@@ -31,9 +31,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: "3000"
+      APP_URL: ${TREK_APP_URL:-http://localhost:${TREK_PORT:-3002}}
       TZ: ${TZ:-Etc/UTC}
       ENCRYPTION_KEY: ${TREK_ENCRYPTION_KEY:?Set TREK_ENCRYPTION_KEY}
-      ALLOWED_ORIGINS: ${TREK_ALLOWED_ORIGINS:-http://trek.casa.home,http://127.0.0.1:3002}
+      ALLOWED_ORIGINS: ${TREK_ALLOWED_ORIGINS:-http://trek.casa.home,http://127.0.0.1:${TREK_PORT:-3002},http://localhost:${TREK_PORT:-3002}}
       # The homelab serves plain HTTP on the LAN: a Secure session cookie would be dropped by the browser.
       # Set to true once trek.casa.home is served over HTTPS.
       COOKIE_SECURE: ${TREK_COOKIE_SECURE:-false}
